@@ -2,117 +2,66 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ─── Theme tokens ─────────────────────────────────────────── */
 :root {
-  /* Light mode */
-  --t-surface:      #F4F6F9;
-  --t-card:         #FFFFFF;
-  --t-elevated:     #FAFBFD;
-  --t-input:        #ECEEF4;
-  --t-hover:        #E5E8F0;
-  --t-border:       #D6DAE8;
-  --t-text:         #1C1F2E;
-  --t-text2:        #505870;
-  --t-text3:        #8892A8;
-  --t-text4:        #B8C2D4;
-  --t-accent:       #5B6B8A;
-  --t-accent-sub:   rgba(91, 107, 138, 0.10);
-  --t-gold:         #C9A84C;
-  --t-gold-sub:     rgba(201, 168, 76, 0.12);
+  --border:  #cbd3d6;
+  --dark:    #232a2e;
+  --muted:   #8a9499;
+  --hover:   #f4f6f7;
+  --white:   #ffffff;
 }
 
-.dark {
-  --t-surface:      #141720;
-  --t-card:         #1D2130;
-  --t-elevated:     #191C27;
-  --t-input:        #252838;
-  --t-hover:        #262A3A;
-  --t-border:       #2E3448;
-  --t-text:         #EDF0F5;
-  --t-text2:        #9AA4BC;
-  --t-text3:        #6A7490;
-  --t-text4:        #3E4560;
-  --t-accent:       #7B8FAD;
-  --t-accent-sub:   rgba(123, 143, 173, 0.12);
-  --t-gold:         #D4A84C;
-  --t-gold-sub:     rgba(212, 168, 76, 0.12);
-}
-
-/* ─── Base ─────────────────────────────────────────────────── */
 @layer base {
-  html {
-    background-color: var(--t-surface);
-    color: var(--t-text);
+  html, body, #root {
+    height: 100%;
+    background: var(--white);
+    color: var(--dark);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   }
 
-  * {
-    border-color: var(--t-border);
-  }
+  * { box-sizing: border-box; }
 
-  ::-webkit-scrollbar { width: 5px; height: 5px; }
-  ::-webkit-scrollbar-track { background: var(--t-surface); }
-  ::-webkit-scrollbar-thumb {
-    background: var(--t-border);
-    border-radius: 9999px;
-  }
-  ::-webkit-scrollbar-thumb:hover { background: var(--t-text4); }
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 9999px; }
 }
 
-/* ─── Components ────────────────────────────────────────────── */
 @layer components {
-  .card {
-    background-color: var(--t-card);
-    border: 1px solid var(--t-border);
-    @apply rounded-xl;
-  }
-
-  .btn {
-    @apply inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-all duration-150 cursor-pointer;
-  }
-
-  .btn-primary {
-    @apply btn text-white;
-    background-color: var(--t-accent);
-  }
-  .btn-primary:hover { opacity: 0.85; }
-
-  .btn-gold {
-    @apply btn text-white;
-    background-color: var(--t-gold);
-  }
-  .btn-gold:hover { opacity: 0.85; }
-
-  .btn-ghost {
-    @apply btn;
-    color: var(--t-text2);
-  }
-  .btn-ghost:hover {
-    color: var(--t-text);
-    background-color: var(--t-hover);
-  }
-
-  .btn-danger {
-    @apply btn text-red-500;
-  }
-  .btn-danger:hover {
-    @apply text-red-400;
-    background-color: rgba(239, 68, 68, 0.08);
-  }
-
   .input {
-    @apply w-full rounded-lg px-3 py-2 text-sm outline-none transition-all;
-    background-color: var(--t-input);
-    border: 1px solid var(--t-border);
-    color: var(--t-text);
+    @apply w-full rounded px-3 py-2 text-sm outline-none transition-all;
+    background: var(--hover);
+    border: 1px solid var(--border);
+    color: var(--dark);
   }
-  .input::placeholder { color: var(--t-text3); }
-  .input:focus {
-    border-color: var(--t-accent);
-    box-shadow: 0 0 0 2px var(--t-accent-sub);
-  }
+  .input::placeholder { color: var(--muted); }
+  .input:focus { border-color: var(--dark); }
 
   .label {
     @apply block text-xs font-medium mb-1;
-    color: var(--t-text2);
+    color: var(--muted);
   }
+
+  .btn {
+    @apply inline-flex items-center gap-1.5 text-sm font-medium transition-all cursor-pointer rounded px-3 py-1.5;
+  }
+  .btn-ghost {
+    @apply btn;
+    color: var(--muted);
+  }
+  .btn-ghost:hover { color: var(--dark); background: var(--hover); }
+
+  .btn-dark {
+    @apply btn text-white;
+    background: var(--dark);
+  }
+  .btn-dark:hover { opacity: 0.85; }
+
+  .pill {
+    @apply inline-flex items-center justify-center text-xs font-semibold cursor-pointer transition-all;
+    width: 28px; height: 28px;
+    border-radius: 6px;
+    color: var(--muted);
+    border: 1px solid var(--border);
+  }
+  .pill:hover { color: var(--dark); border-color: var(--dark); }
+  .pill.active { background: var(--dark); color: white; border-color: var(--dark); }
 }

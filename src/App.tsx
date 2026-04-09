@@ -1,109 +1,94 @@
 import { useState } from 'react'
+import { startOfWeek } from 'date-fns'
 import { useAuth } from './hooks/useAuth'
-import { useTheme } from './hooks/useTheme'
 import { useTasks } from './hooks/useTasks'
 import { Login } from './pages/Login'
-import { Sidebar } from './components/Sidebar'
-import { Header } from './components/Header'
-import { DailyView } from './components/views/DailyView'
-import { WeeklyView } from './components/views/WeeklyView'
-import { BoardView } from './components/views/BoardView'
-import { BranchView } from './components/views/BranchView'
-import { AnalyticsView } from './components/views/AnalyticsView'
-import { Modal } from './components/ui/Modal'
-import { TaskForm } from './components/TaskForm'
-import type { Branch, ViewType } from './types/task'
+import { TopBar } from './components/TopBar'
+import { TeuxView } from './components/TeuxView'
+import { CalendarView } from './components/CalendarView'
+import { Backlog } from './components/Backlog'
 
-const VIEW_LABELS: Record<ViewType, string> = {
-  daily: 'Daily',
-  weekly: 'Weekly',
-  board: 'Board',
-  branch: 'Branch',
-  analytics: 'Analytics',
-}
+type ColCount = 1 | 3 | 7
+type ViewMode = 'columns' | 'calendar'
 
 export default function App() {
   const { user, loading: authLoading, signIn, signOut } = useAuth()
-  const { theme, toggle: toggleTheme } = useTheme()
-  const [view, setView] = useState<ViewType>('daily')
-  const [activeBranch, setActiveBranch] = useState<Branch | null>(null)
-  const [showAdd, setShowAdd] = useState(false)
-
-  const { tasks, loading, filters, addTask, editTask, removeTask, cycleStatus, updateFilter, setTasks } = useTasks(
-    activeBranch ? { branch: activeBranch } : undefined,
-    !!user
+  const [colCount, setColCount] = useState<ColCount>(7)
+  const [view, setView] = useState<ViewMode>('columns')
+  const [startDate, setStartDate] = useState<Date>(() =>
+    startOfWeek(new Date(), { weekStartsOn: 1 })
   )
+  const [showBacklog, setShowBacklog] = useState(false)
+
+  const { tasks, loading, addTask, editTask, removeTask, cycleStatus } = useTasks(undefined, !!user)
 
   if (authLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: 'var(--t-surface)' }}>
-        <div className="text-sm" style={{ color: 'var(--t-text3)' }}>Loading...</div>
+      <div className="min-h-screen flex items-center justify-center">
+        <span className="text-sm" style={{ color: '#cbd3d6' }}>Loading...</span>
       </div>
     )
   }
 
-  if (!user) {
-    return <Login onSignIn={signIn} />
+  if (!user) return <Login onSignIn={signIn} />
+
+  const backlogCount = tasks.filter(t => !t.assigned_date).length
+
+  const handleToggleDone = async (task: typeof tasks[0]) => {
+    await editTask(task.id, { status: task.status === 'Done' ? 'Not Yet' : 'Done' })
   }
 
-  const handleBranchChange = (b: Branch | null) => {
-    setActiveBranch(b)
-    if (b) setView('branch')
+  const handleCalendarDayClick = (date: string) => {
+    const d = new Date(date + 'T00:00:00')
+    setStartDate(d)
+    setColCount(1)
+    setView('columns')
   }
 
   return (
-    <div className="flex min-h-screen" style={{ backgroundColor: 'var(--t-surface)' }}>
-      <Sidebar
+    <div className="flex flex-col" style={{ height: '100vh', overflow: 'hidden' }}>
+      <TopBar
+        colCount={colCount}
+        setColCount={setColCount}
         view={view}
-        onViewChange={setView}
-        activeBranch={activeBranch}
-        onBranchChange={handleBranchChange}
-        onAddTask={() => setShowAdd(true)}
+        setView={setView}
+        startDate={startDate}
+        setStartDate={setStartDate}
+        onBacklog={() => setShowBacklog(true)}
         onSignOut={signOut}
+        backlogCount={backlogCount}
       />
 
-      <div className="flex-1 flex flex-col min-w-0">
-        <Header
-          search={filters.search}
-          onSearchChange={v => updateFilter('search', v)}
-          title={VIEW_LABELS[view]}
-          theme={theme}
-          onToggleTheme={toggleTheme}
+      {loading ? (
+        <div className="flex-1 flex items-center justify-center">
+          <span className="text-sm" style={{ color: '#cbd3d6' }}>Loading tasks...</span>
+        </div>
+      ) : view === 'columns' ? (
+        <TeuxView
+          colCount={colCount}
+          startDate={startDate}
+          tasks={tasks}
+          onToggleDone={handleToggleDone}
+          onEdit={editTask}
+          onDelete={removeTask}
+          onAdd={addTask}
         />
-
-        <main className="flex-1 overflow-auto">
-          {loading ? (
-            <div className="flex items-center justify-center h-64 text-sm" style={{ color: 'var(--t-text4)' }}>
-              Loading tasks...
-            </div>
-          ) : (
-            <>
-              {view === 'daily' && (
-                <DailyView tasks={tasks} onEdit={editTask} onDelete={removeTask} onCycle={cycleStatus} onAdd={addTask} setTasks={setTasks} />
-              )}
-              {view === 'weekly' && (
-                <WeeklyView tasks={tasks} onEdit={editTask} onCycle={cycleStatus} />
-              )}
-              {view === 'board' && (
-                <BoardView tasks={tasks} onEdit={editTask} onDelete={removeTask} onCycle={cycleStatus} onAdd={addTask} />
-              )}
-              {view === 'branch' && (
-                <BranchView tasks={tasks} activeBranch={activeBranch} onEdit={editTask} onDelete={removeTask} onCycle={cycleStatus} />
-              )}
-              {view === 'analytics' && (
-                <AnalyticsView tasks={tasks} />
-              )}
-            </>
-          )}
-        </main>
-      </div>
-
-      <Modal open={showAdd} onClose={() => setShowAdd(false)} title="New Task">
-        <TaskForm
-          onSubmit={async data => { await addTask(data); setShowAdd(false) }}
-          onCancel={() => setShowAdd(false)}
+      ) : (
+        <CalendarView
+          tasks={tasks}
+          onDayClick={handleCalendarDayClick}
         />
-      </Modal>
+      )}
+
+      {showBacklog && (
+        <Backlog
+          tasks={tasks}
+          onToggleDone={handleToggleDone}
+          onEdit={editTask}
+          onDelete={removeTask}
+          onClose={() => setShowBacklog(false)}
+        />
+      )}
     </div>
   )
 }

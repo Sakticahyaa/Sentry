@@ -23,24 +23,24 @@ export function Modal({ open, onClose, title, children, size = 'md' }: ModalProp
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div
-        className="absolute inset-0 backdrop-blur-sm"
-        style={{ backgroundColor: 'rgba(0,0,0,0.35)' }}
+        className="absolute inset-0"
+        style={{ background: 'rgba(35,42,46,0.2)' }}
         onClick={onClose}
       />
       <div
-        className={`relative w-full ${widths[size]} rounded-xl shadow-2xl border`}
-        style={{ backgroundColor: 'var(--t-card)', borderColor: 'var(--t-border)' }}
+        className={`relative w-full ${widths[size]} rounded-lg shadow-xl`}
+        style={{ background: '#ffffff', border: '1px solid #cbd3d6' }}
       >
         <div
-          className="flex items-center justify-between p-4 border-b"
-          style={{ borderColor: 'var(--t-border)' }}
+          className="flex items-center justify-between px-5 py-4"
+          style={{ borderBottom: '1px solid #cbd3d6' }}
         >
-          <h2 className="text-base font-semibold" style={{ color: 'var(--t-text)' }}>{title}</h2>
-          <button onClick={onClose} className="btn-ghost p-1.5">
-            <X size={16} />
+          <h2 className="text-sm font-semibold" style={{ color: '#232a2e' }}>{title}</h2>
+          <button onClick={onClose} className="btn-ghost p-1">
+            <X size={15} />
           </button>
         </div>
-        <div className="p-4 max-h-[80vh] overflow-y-auto">{children}</div>
+        <div className="px-5 py-4 max-h-[80vh] overflow-y-auto">{children}</div>
       </div>
     </div>
   )

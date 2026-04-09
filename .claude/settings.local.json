@@ -9,7 +9,8 @@
       "Bash(npm install:*)",
       "Bash(npx tsc:*)",
       "Bash(npm run:*)",
-      "Bash(git config:*)"
+      "Bash(git config:*)",
+      "Bash(python -m json.tool)"
     ]
   }
 }

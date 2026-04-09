@@ -24,27 +24,20 @@ export function Login({ onSignIn }: LoginProps) {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4" style={{ backgroundColor: 'var(--t-surface)' }}>
-      <div className="w-full max-w-sm">
-        {/* Brand */}
+    <div className="min-h-screen flex items-center justify-center" style={{ background: '#ffffff' }}>
+      <div className="w-full max-w-xs">
         <div className="text-center mb-8">
-          <div
-            className="w-12 h-12 rounded-2xl flex items-center justify-center text-white text-xl font-bold mx-auto mb-3"
-            style={{ backgroundColor: 'var(--t-accent)' }}
-          >
-            S
-          </div>
-          <h1 className="text-xl font-bold" style={{ color: 'var(--t-text)' }}>Sentry</h1>
-          <p className="text-sm mt-1" style={{ color: 'var(--t-text3)' }}>Hyke Task Manager</p>
+          <div className="text-2xl font-bold tracking-tight" style={{ color: '#232a2e' }}>Sentry</div>
+          <div className="text-sm mt-1" style={{ color: '#cbd3d6' }}>Hyke Task Manager</div>
         </div>
 
-        <form onSubmit={handleSubmit} className="card p-6 space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-3">
           <div>
             <label className="label">Email</label>
             <input
               type="email"
               className="input"
-              placeholder="admin@example.com"
+              placeholder="you@example.com"
               value={email}
               onChange={e => setEmail(e.target.value)}
               required
@@ -64,12 +57,14 @@ export function Login({ onSignIn }: LoginProps) {
           </div>
 
           {error && (
-            <div className="text-sm text-red-500 bg-red-500/10 border border-red-500/20 rounded-lg p-3">
-              {error}
-            </div>
+            <p className="text-xs text-red-500">{error}</p>
           )}
 
-          <button type="submit" className="btn-primary w-full justify-center py-2" disabled={loading}>
+          <button
+            type="submit"
+            className="btn-dark w-full justify-center py-2"
+            disabled={loading}
+          >
             {loading ? 'Signing in...' : 'Sign In'}
           </button>
         </form>
