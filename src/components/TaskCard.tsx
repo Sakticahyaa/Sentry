@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { GripVertical, Pencil, Trash2, Clock, Calendar } from 'lucide-react'
+import { GripVertical, Pencil, Trash2, Clock, Calendar, Square, CheckSquare } from 'lucide-react'
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import type { Task } from '../types/task'
@@ -16,9 +16,10 @@ interface TaskCardProps {
   isDraggable?: boolean
 }
 
-export function TaskCard({ task, onEdit, onDelete, isDraggable = true }: TaskCardProps) {
+export function TaskCard({ task, onEdit, onDelete, onCycle, isDraggable = true }: TaskCardProps) {
   const [editing, setEditing] = useState(false)
   const [deleting, setDeleting] = useState(false)
+  const [hovered, setHovered] = useState(false)
 
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: task.id,
@@ -56,14 +57,45 @@ export function TaskCard({ task, onEdit, onDelete, isDraggable = true }: TaskCar
     setDeleting(false)
   }
 
+  const isDone = task.status === 'Done'
+
+  const handleToggleDone = async (e: React.MouseEvent) => {
+    e.stopPropagation()
+    await onEdit(task.id, { status: isDone ? 'Not Yet' : 'Done' })
+  }
+
   return (
     <>
       <div
         ref={setNodeRef}
-        style={{ ...style }}
-        className={`card p-3 group transition-all hover:shadow-sm ${task.status === 'Done' ? 'opacity-55' : ''}`}
+        style={{ ...style, border: '1px solid var(--t-border)' }}
+        className={`group transition-all rounded-lg overflow-hidden ${isDone ? 'opacity-55' : ''}`}
+        onMouseEnter={() => setHovered(true)}
+        onMouseLeave={() => setHovered(false)}
       >
-        <div className="flex items-start gap-2">
+        <div className="flex items-stretch">
+          {/* Sliding checkbox */}
+          <div style={{
+            width: hovered || isDone ? 32 : 0,
+            overflow: 'hidden',
+            flexShrink: 0,
+            transition: 'width 0.15s ease',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            backgroundColor: 'var(--t-hover)',
+          }}>
+            <button
+              onPointerDown={e => e.stopPropagation()}
+              onClick={handleToggleDone}
+              style={{ color: isDone ? 'var(--t-accent)' : 'var(--t-text4)', display: 'flex', alignItems: 'center' }}
+            >
+              {isDone ? <CheckSquare size={14} /> : <Square size={14} />}
+            </button>
+          </div>
+
+          <div className="flex-1 p-3 min-w-0">
+          <div className="flex items-start gap-2">
           {isDraggable && (
             <div
               {...attributes}
@@ -118,6 +150,9 @@ export function TaskCard({ task, onEdit, onDelete, isDraggable = true }: TaskCar
             <button onClick={handleDelete} disabled={deleting} className="btn-danger p-1">
               <Trash2 size={12} />
             </button>
+          </div>
+        </div>
+        </div>
           </div>
         </div>
       </div>

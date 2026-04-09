@@ -13,7 +13,9 @@ interface BacklogProps {
 }
 
 export function Backlog({ tasks, onToggleDone, onEdit, onDelete, onClose }: BacklogProps) {
-  const backlogTasks = tasks.filter(t => !t.assigned_date)
+  const backlogTasks = tasks
+    .filter(t => !t.assigned_date)
+    .sort((a, b) => (a.branch ?? '').localeCompare(b.branch ?? ''))
   const displayIds = buildDisplayIds(tasks)
 
   useEffect(() => {

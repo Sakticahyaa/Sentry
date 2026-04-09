@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react'
 import { format, addDays, subDays, parseISO, isToday } from 'date-fns'
-import { ChevronLeft, ChevronRight, AlertTriangle, Clock, Plus } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Plus } from 'lucide-react'
 import {
   DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, type DragEndEvent,
 } from '@dnd-kit/core'
@@ -9,7 +9,7 @@ import {
 } from '@dnd-kit/sortable'
 import type { Task, TimeBlock } from '../../types/task'
 import { TaskCard } from '../TaskCard'
-import { TIME_BLOCKS, OVERCOMMIT_HOURS } from '../../constants/timeblocks'
+import { TIME_BLOCKS } from '../../constants/timeblocks'
 import { Modal } from '../ui/Modal'
 import { TaskForm } from '../TaskForm'
 import { reorderTasks } from '../../lib/supabase'
@@ -33,13 +33,22 @@ export function DailyView({ tasks, onEdit, onDelete, onCycle, onAdd, setTasks }:
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
   )
 
+  const BLOCK_ORDER: Record<string, number> = {
+    H0: 0, Q1: 1, Q2: 2, H1: 3, Q3: 4, Q4: 5, H2: 6, Q5: 7, Q6: 8, H3: 9,
+  }
+
   const dayTasks = useMemo(() =>
-    tasks.filter(t => t.assigned_date === date).sort((a, b) => a.order - b.order),
+    tasks
+      .filter(t => t.assigned_date === date)
+      .sort((a, b) => {
+        const aBlock = a.time_block != null ? (BLOCK_ORDER[a.time_block] ?? 99) : 99
+        const bBlock = b.time_block != null ? (BLOCK_ORDER[b.time_block] ?? 99) : 99
+        if (aBlock !== bBlock) return aBlock - bBlock
+        if (a.priority !== b.priority) return a.priority - b.priority
+        return (a.branch ?? '').localeCompare(b.branch ?? '')
+      }),
     [tasks, date]
   )
-
-  const totalHours = dayTasks.reduce((s, t) => s + (t.estimated_time ?? 0), 0)
-  const overcommitted = totalHours > OVERCOMMIT_HOURS
 
   const handleDragEnd = async (event: DragEndEvent) => {
     const { active, over } = event
@@ -96,34 +105,10 @@ export function DailyView({ tasks, onEdit, onDelete, onCycle, onAdd, setTasks }:
         </button>
       </div>
 
-      {/* Summary bar */}
-      <div
-        className="flex items-center gap-3 mb-4 p-3 rounded-xl border"
-        style={{
-          borderColor: overcommitted ? 'rgba(239,68,68,0.3)' : 'var(--t-border)',
-          backgroundColor: overcommitted ? 'rgba(239,68,68,0.06)' : 'var(--t-card)',
-        }}
-      >
-        <Clock size={14} style={{ color: overcommitted ? '#ef4444' : 'var(--t-text3)' }} />
-        <span className="text-sm" style={{ color: 'var(--t-text2)' }}>
-          Total:{' '}
-          <span
-            className="font-semibold"
-            style={{ color: overcommitted ? '#ef4444' : 'var(--t-text)' }}
-          >
-            {totalHours.toFixed(1)}h
-          </span>
-        </span>
-        <span style={{ color: 'var(--t-text4)' }}>·</span>
-        <span className="text-sm" style={{ color: 'var(--t-text3)' }}>{dayTasks.length} tasks</span>
-
-        {overcommitted && (
-          <span className="flex items-center gap-1 text-xs text-red-500 ml-auto">
-            <AlertTriangle size={12} /> Overcommitted! Max {OVERCOMMIT_HOURS}h
-          </span>
-        )}
-
-        <label className="flex items-center gap-1.5 text-xs cursor-pointer ml-auto" style={{ color: 'var(--t-text3)' }}>
+      {/* Group by block toggle */}
+      <div className="flex items-center justify-between mb-4">
+        <span className="text-xs" style={{ color: 'var(--t-text3)' }}>{dayTasks.length} tasks</span>
+        <label className="flex items-center gap-1.5 text-xs cursor-pointer" style={{ color: 'var(--t-text3)' }}>
           <input
             type="checkbox"
             checked={groupByBlock}
