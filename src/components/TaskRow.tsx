@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Trash2, Circle, CheckCircle } from 'lucide-react'
+import { Trash2, Square, CheckSquare } from 'lucide-react'
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import type { Task } from '../types/task'
@@ -52,23 +52,26 @@ export function TaskRow({ task, displayId, onToggleDone, onEdit, onDelete }: Tas
         {...attributes}
         {...listeners}
       >
-        {/* Checkbox — click toggles done, stopPropagation prevents drag */}
-        <button
-          onPointerDown={e => e.stopPropagation()}
-          onClick={e => { e.stopPropagation(); onToggleDone(task) }}
-          className="shrink-0 flex items-center justify-center"
+        {/* Checkbox — slides in from left on hover */}
+        <div
           style={{
-            width: 28, height: '100%', minHeight: 36,
-            opacity: hovered || isDone ? 1 : 0,
-            transition: 'opacity 0.1s',
-            color: isDone ? '#8a9499' : '#cbd3d6',
+            width: hovered || isDone ? 26 : 0,
+            overflow: 'hidden',
+            flexShrink: 0,
+            transition: 'width 0.15s ease',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
           }}
         >
-          {isDone
-            ? <CheckCircle size={13} />
-            : <Circle size={13} />
-          }
-        </button>
+          <button
+            onPointerDown={e => e.stopPropagation()}
+            onClick={e => { e.stopPropagation(); onToggleDone(task) }}
+            style={{ color: isDone ? '#8a9499' : '#cbd3d6', display: 'flex', alignItems: 'center' }}
+          >
+            {isDone ? <CheckSquare size={15} /> : <Square size={15} />}
+          </button>
+        </div>
 
         {/* Branch color strip */}
         <div
