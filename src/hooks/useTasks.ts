@@ -35,16 +35,14 @@ export function useTasks(initialFilters?: Partial<Filters>) {
     load()
   }, [load])
 
-  const addTask = async (task: Partial<TaskInsert>) => {
+  const addTask = async (task: Partial<TaskInsert>): Promise<void> => {
     const created = await createTask(task)
     setTasks(prev => [created, ...prev])
-    return created
   }
 
-  const editTask = async (id: string, updates: TaskUpdate) => {
+  const editTask = async (id: string, updates: TaskUpdate): Promise<void> => {
     const updated = await updateTask(id, updates)
     setTasks(prev => prev.map(t => (t.id === id ? updated : t)))
-    return updated
   }
 
   const removeTask = async (id: string) => {
