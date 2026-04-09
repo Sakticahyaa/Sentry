@@ -8,17 +8,17 @@ export const TIME_BLOCKS: { value: TimeBlock; label: string; range: string }[] =
   { value: 'Q5', label: 'Q5', range: '18:00–21:00' },
   { value: 'Q6', label: 'Q6', range: '21:00–00:00' },
   { value: 'H0', label: 'H0', range: '00:00–06:00' },
-  { value: 'H1', label: 'H1 (Pagi)', range: '06:00–12:00' },
-  { value: 'H2', label: 'H2 (Siang)', range: '12:00–18:00' },
-  { value: 'H3', label: 'H3 (Malam)', range: '18:00–00:00' },
+  { value: 'H1', label: 'H1 (Morning)',   range: '06:00–12:00' },
+  { value: 'H2', label: 'H2 (Afternoon)', range: '12:00–18:00' },
+  { value: 'H3', label: 'H3 (Evening)',   range: '18:00–00:00' },
 ]
 
 export const PRIORITY_CONFIG = [
-  { value: 1, label: 'Kritis', icon: '🔴' },
-  { value: 2, label: 'Tinggi', icon: '🟠' },
-  { value: 3, label: 'Sedang', icon: '🟡' },
-  { value: 4, label: 'Rendah', icon: '🔵' },
-  { value: 5, label: 'Opsional', icon: '⚪' },
+  { value: 1, label: 'Critical', icon: '🔴' },
+  { value: 2, label: 'High',     icon: '🟠' },
+  { value: 3, label: 'Medium',   icon: '🟡' },
+  { value: 4, label: 'Low',      icon: '🔵' },
+  { value: 5, label: 'Optional', icon: '⚪' },
 ]
 
 export const OVERCOMMIT_HOURS = 12

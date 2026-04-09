@@ -1,21 +1,11 @@
 import { useState, useMemo } from 'react'
 import { format, addDays, subDays, parseISO, isToday } from 'date-fns'
-import { id as idLocale } from 'date-fns/locale'
 import { ChevronLeft, ChevronRight, AlertTriangle, Clock, Plus } from 'lucide-react'
 import {
-  DndContext,
-  closestCenter,
-  KeyboardSensor,
-  PointerSensor,
-  useSensor,
-  useSensors,
-  type DragEndEvent,
+  DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, type DragEndEvent,
 } from '@dnd-kit/core'
 import {
-  SortableContext,
-  sortableKeyboardCoordinates,
-  verticalListSortingStrategy,
-  arrayMove,
+  SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy, arrayMove,
 } from '@dnd-kit/sortable'
 import type { Task, TimeBlock } from '../../types/task'
 import { TaskCard } from '../TaskCard'
@@ -44,12 +34,11 @@ export function DailyView({ tasks, onEdit, onDelete, onCycle, onAdd, setTasks }:
   )
 
   const dayTasks = useMemo(() =>
-    tasks.filter(t => t.assigned_date === date)
-      .sort((a, b) => a.order - b.order),
+    tasks.filter(t => t.assigned_date === date).sort((a, b) => a.order - b.order),
     [tasks, date]
   )
 
-  const totalHours = dayTasks.reduce((sum, t) => sum + (t.estimated_time ?? 0), 0)
+  const totalHours = dayTasks.reduce((s, t) => s + (t.estimated_time ?? 0), 0)
   const overcommitted = totalHours > OVERCOMMIT_HOURS
 
   const handleDragEnd = async (event: DragEndEvent) => {
@@ -57,15 +46,12 @@ export function DailyView({ tasks, onEdit, onDelete, onCycle, onAdd, setTasks }:
     if (!over || active.id === over.id) return
 
     const ids = dayTasks.map(t => t.id)
-    const oldIdx = ids.indexOf(active.id as string)
-    const newIdx = ids.indexOf(over.id as string)
-    const reordered = arrayMove(dayTasks, oldIdx, newIdx)
+    const reordered = arrayMove(dayTasks, ids.indexOf(active.id as string), ids.indexOf(over.id as string))
 
     setTasks(prev => {
       const others = prev.filter(t => t.assigned_date !== date)
       return [...others, ...reordered.map((t, i) => ({ ...t, order: i }))]
     })
-
     await reorderTasks(reordered.map((t, i) => ({ id: t.id, order: i })))
   }
 
@@ -80,8 +66,7 @@ export function DailyView({ tasks, onEdit, onDelete, onCycle, onAdd, setTasks }:
     return map
   }, [dayTasks, groupByBlock])
 
-  const dateObj = parseISO(date)
-  const isCurrentDay = isToday(dateObj)
+  const isCurrentDay = isToday(parseISO(date))
 
   return (
     <div className="p-6 max-w-2xl mx-auto">
@@ -95,9 +80,12 @@ export function DailyView({ tasks, onEdit, onDelete, onCycle, onAdd, setTasks }:
             type="date"
             value={date}
             onChange={e => setDate(e.target.value)}
-            className="bg-transparent text-gray-100 font-semibold text-base cursor-pointer outline-none"
+            className="bg-transparent font-semibold text-base cursor-pointer outline-none"
+            style={{ color: 'var(--t-text)' }}
           />
-          {isCurrentDay && <span className="ml-2 text-xs text-blue-400">Hari ini</span>}
+          {isCurrentDay && (
+            <span className="ml-2 text-xs font-medium" style={{ color: 'var(--t-accent)' }}>Today</span>
+          )}
         </div>
         <button onClick={() => setDate(format(addDays(parseISO(date), 1), 'yyyy-MM-dd'))} className="btn-ghost p-1.5">
           <ChevronRight size={16} />
@@ -105,29 +93,41 @@ export function DailyView({ tasks, onEdit, onDelete, onCycle, onAdd, setTasks }:
       </div>
 
       {/* Summary bar */}
-      <div className={`flex items-center gap-3 mb-4 p-3 rounded-xl border ${overcommitted ? 'border-red-500/40 bg-red-950/20' : 'border-gray-800 bg-gray-900'}`}>
-        <Clock size={14} className={overcommitted ? 'text-red-400' : 'text-gray-500'} />
-        <span className="text-sm text-gray-400">
-          Total: <span className={`font-semibold ${overcommitted ? 'text-red-400' : 'text-gray-100'}`}>{totalHours.toFixed(1)} jam</span>
+      <div
+        className="flex items-center gap-3 mb-4 p-3 rounded-xl border"
+        style={{
+          borderColor: overcommitted ? 'rgba(239,68,68,0.3)' : 'var(--t-border)',
+          backgroundColor: overcommitted ? 'rgba(239,68,68,0.06)' : 'var(--t-card)',
+        }}
+      >
+        <Clock size={14} style={{ color: overcommitted ? '#ef4444' : 'var(--t-text3)' }} />
+        <span className="text-sm" style={{ color: 'var(--t-text2)' }}>
+          Total:{' '}
+          <span
+            className="font-semibold"
+            style={{ color: overcommitted ? '#ef4444' : 'var(--t-text)' }}
+          >
+            {totalHours.toFixed(1)}h
+          </span>
         </span>
-        <span className="text-gray-700">·</span>
-        <span className="text-sm text-gray-500">{dayTasks.length} tugas</span>
+        <span style={{ color: 'var(--t-text4)' }}>·</span>
+        <span className="text-sm" style={{ color: 'var(--t-text3)' }}>{dayTasks.length} tasks</span>
+
         {overcommitted && (
-          <span className="flex items-center gap-1 text-xs text-red-400 ml-auto">
-            <AlertTriangle size={12} /> Overcommit! Max {OVERCOMMIT_HOURS}j
+          <span className="flex items-center gap-1 text-xs text-red-500 ml-auto">
+            <AlertTriangle size={12} /> Overcommitted! Max {OVERCOMMIT_HOURS}h
           </span>
         )}
-        <div className="flex items-center gap-2 ml-auto">
-          <label className="flex items-center gap-1.5 text-xs text-gray-500 cursor-pointer">
-            <input
-              type="checkbox"
-              checked={groupByBlock}
-              onChange={e => setGroupByBlock(e.target.checked)}
-              className="accent-blue-500"
-            />
-            Kelompok blok waktu
-          </label>
-        </div>
+
+        <label className="flex items-center gap-1.5 text-xs cursor-pointer ml-auto" style={{ color: 'var(--t-text3)' }}>
+          <input
+            type="checkbox"
+            checked={groupByBlock}
+            onChange={e => setGroupByBlock(e.target.checked)}
+            style={{ accentColor: 'var(--t-accent)' }}
+          />
+          Group by time block
+        </label>
       </div>
 
       {/* Task list */}
@@ -148,9 +148,9 @@ export function DailyView({ tasks, onEdit, onDelete, onCycle, onAdd, setTasks }:
               return (
                 <div key={block.value}>
                   <div className="flex items-center gap-2 mb-2">
-                    <span className="text-xs font-bold text-gray-500 uppercase">{block.label}</span>
-                    <span className="text-xs text-gray-700">{block.range}</span>
-                    <span className="text-xs text-gray-700 ml-auto">{blockTasks.length} tugas</span>
+                    <span className="text-xs font-bold uppercase tracking-wider" style={{ color: 'var(--t-text3)' }}>{block.label}</span>
+                    <span className="text-xs" style={{ color: 'var(--t-text4)' }}>{block.range}</span>
+                    <span className="text-xs ml-auto" style={{ color: 'var(--t-text4)' }}>{blockTasks.length} tasks</span>
                   </div>
                   <SortableContext items={blockTasks.map(t => t.id)} strategy={verticalListSortingStrategy}>
                     <div className="space-y-2">
@@ -165,7 +165,7 @@ export function DailyView({ tasks, onEdit, onDelete, onCycle, onAdd, setTasks }:
             {(grouped?.get('none') ?? []).length > 0 && (
               <div>
                 <div className="flex items-center gap-2 mb-2">
-                  <span className="text-xs font-bold text-gray-600 uppercase">Tanpa Blok</span>
+                  <span className="text-xs font-bold uppercase tracking-wider" style={{ color: 'var(--t-text4)' }}>No Block</span>
                 </div>
                 <div className="space-y-2">
                   {(grouped?.get('none') ?? []).map(task => (
@@ -179,20 +179,23 @@ export function DailyView({ tasks, onEdit, onDelete, onCycle, onAdd, setTasks }:
       </DndContext>
 
       {dayTasks.length === 0 && (
-        <div className="text-center py-16 text-gray-700">
-          <p className="text-sm">Tidak ada tugas untuk hari ini</p>
+        <div className="text-center py-16 text-sm" style={{ color: 'var(--t-text4)' }}>
+          No tasks for this day
         </div>
       )}
 
       {/* Quick add */}
       <button
         onClick={() => setAdding(true)}
-        className="mt-4 w-full flex items-center justify-center gap-2 py-2 rounded-xl border border-dashed border-gray-800 text-gray-700 hover:text-gray-400 hover:border-gray-700 transition-all text-sm"
+        className="mt-4 w-full flex items-center justify-center gap-2 py-2 rounded-xl border border-dashed text-sm transition-all"
+        style={{ borderColor: 'var(--t-border)', color: 'var(--t-text4)' }}
+        onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.color = 'var(--t-text2)'; (e.currentTarget as HTMLButtonElement).style.borderColor = 'var(--t-text3)' }}
+        onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.color = 'var(--t-text4)'; (e.currentTarget as HTMLButtonElement).style.borderColor = 'var(--t-border)' }}
       >
-        <Plus size={14} /> Tambah tugas
+        <Plus size={14} /> Add task
       </button>
 
-      <Modal open={adding} onClose={() => setAdding(false)} title="Tugas Baru">
+      <Modal open={adding} onClose={() => setAdding(false)} title="New Task">
         <TaskForm
           initial={{ assigned_date: date }}
           onSubmit={async data => { await onAdd(data); setAdding(false) }}

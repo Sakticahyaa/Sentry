@@ -1,6 +1,5 @@
 import { useState, useMemo } from 'react'
 import { format, startOfWeek, addDays, parseISO, isToday } from 'date-fns'
-import { id as idLocale } from 'date-fns/locale'
 import { ChevronLeft, ChevronRight, AlertTriangle, Clock } from 'lucide-react'
 import type { Task } from '../../types/task'
 import { BranchBadge, PriorityBadge } from '../ui/Badge'
@@ -14,14 +13,9 @@ interface WeeklyViewProps {
 }
 
 export function WeeklyView({ tasks, onEdit, onCycle }: WeeklyViewProps) {
-  const [weekStart, setWeekStart] = useState(() =>
-    startOfWeek(new Date(), { weekStartsOn: 1 })
-  )
+  const [weekStart, setWeekStart] = useState(() => startOfWeek(new Date(), { weekStartsOn: 1 }))
 
-  const days = useMemo(() =>
-    Array.from({ length: 7 }, (_, i) => addDays(weekStart, i)),
-    [weekStart]
-  )
+  const days = useMemo(() => Array.from({ length: 7 }, (_, i) => addDays(weekStart, i)), [weekStart])
 
   const tasksByDay = useMemo(() => {
     const map = new Map<string, Task[]>()
@@ -43,17 +37,14 @@ export function WeeklyView({ tasks, onEdit, onCycle }: WeeklyViewProps) {
         <button onClick={() => setWeekStart(d => addDays(d, -7))} className="btn-ghost p-1.5">
           <ChevronLeft size={16} />
         </button>
-        <span className="flex-1 text-center text-sm font-semibold text-gray-300">
-          {format(weekStart, "d MMM", { locale: idLocale })} — {format(addDays(weekStart, 6), "d MMM yyyy", { locale: idLocale })}
+        <span className="flex-1 text-center text-sm font-semibold" style={{ color: 'var(--t-text)' }}>
+          {format(weekStart, "MMM d")} — {format(addDays(weekStart, 6), "MMM d, yyyy")}
         </span>
         <button onClick={() => setWeekStart(d => addDays(d, 7))} className="btn-ghost p-1.5">
           <ChevronRight size={16} />
         </button>
-        <button
-          onClick={() => setWeekStart(startOfWeek(new Date(), { weekStartsOn: 1 }))}
-          className="btn-ghost text-xs"
-        >
-          Minggu ini
+        <button onClick={() => setWeekStart(startOfWeek(new Date(), { weekStartsOn: 1 }))} className="btn-ghost text-xs">
+          This week
         </button>
       </div>
 
@@ -69,24 +60,25 @@ export function WeeklyView({ tasks, onEdit, onCycle }: WeeklyViewProps) {
           return (
             <div
               key={key}
-              className={`card p-2 flex flex-col gap-1.5 min-h-[200px] ${today ? 'border-blue-500/40' : ''}`}
-              onDragOver={e => e.preventDefault()}
-              onDrop={e => {
-                e.preventDefault()
-                const tid = e.dataTransfer.getData('taskId')
-                if (tid) handleDrop(tid, key)
+              className="rounded-xl border p-2 flex flex-col gap-1.5 min-h-[200px]"
+              style={{
+                backgroundColor: 'var(--t-card)',
+                borderColor: today ? 'var(--t-accent)' : 'var(--t-border)',
               }}
+              onDragOver={e => e.preventDefault()}
+              onDrop={e => { e.preventDefault(); const tid = e.dataTransfer.getData('taskId'); if (tid) handleDrop(tid, key) }}
             >
               {/* Day header */}
-              <div className={`text-center mb-1 pb-1 border-b border-gray-800 ${today ? 'text-blue-400' : 'text-gray-500'}`}>
-                <div className="text-xs font-medium uppercase">
-                  {format(day, 'EEE', { locale: idLocale })}
-                </div>
-                <div className={`text-lg font-bold ${today ? 'text-blue-400' : 'text-gray-300'}`}>
+              <div
+                className="text-center mb-1 pb-1 border-b"
+                style={{ borderColor: 'var(--t-border)', color: today ? 'var(--t-accent)' : 'var(--t-text3)' }}
+              >
+                <div className="text-xs font-semibold uppercase">{format(day, 'EEE')}</div>
+                <div className="text-lg font-bold" style={{ color: today ? 'var(--t-accent)' : 'var(--t-text)' }}>
                   {format(day, 'd')}
                 </div>
-                <div className={`flex items-center justify-center gap-0.5 text-xs ${over ? 'text-red-400' : 'text-gray-600'}`}>
-                  <Clock size={9} /> {totalHours.toFixed(1)}j
+                <div className="flex items-center justify-center gap-0.5 text-xs" style={{ color: over ? '#ef4444' : 'var(--t-text4)' }}>
+                  <Clock size={9} /> {totalHours.toFixed(1)}h
                   {over && <AlertTriangle size={9} className="ml-0.5" />}
                 </div>
               </div>
@@ -98,23 +90,17 @@ export function WeeklyView({ tasks, onEdit, onCycle }: WeeklyViewProps) {
                   draggable
                   onDragStart={e => e.dataTransfer.setData('taskId', task.id)}
                   onClick={() => onCycle(task)}
-                  className={`p-1.5 rounded-lg border cursor-pointer text-xs transition-all hover:opacity-80 ${
-                    task.status === 'Done' ? 'opacity-40 line-through' : ''
-                  }`}
+                  className={`p-1.5 rounded-lg border cursor-pointer text-xs transition-all hover:opacity-75 ${task.status === 'Done' ? 'opacity-40 line-through' : ''}`}
                   style={{
-                    borderColor: task.branch ? BRANCH_COLORS[task.branch] + '40' : '#374151',
-                    backgroundColor: task.branch ? BRANCH_COLORS[task.branch] + '10' : '#1f2937',
+                    borderColor: task.branch ? BRANCH_COLORS[task.branch] + '40' : 'var(--t-border)',
+                    backgroundColor: task.branch ? BRANCH_COLORS[task.branch] + '12' : 'var(--t-hover)',
                   }}
                 >
                   <div className="flex items-start gap-1">
                     <PriorityBadge priority={task.priority} />
-                    <span className="text-gray-300 line-clamp-2 flex-1">{task.title}</span>
+                    <span className="line-clamp-2 flex-1" style={{ color: 'var(--t-text)' }}>{task.title}</span>
                   </div>
-                  {task.branch && (
-                    <div className="mt-1">
-                      <BranchBadge branch={task.branch} />
-                    </div>
-                  )}
+                  {task.branch && <div className="mt-1"><BranchBadge branch={task.branch} /></div>}
                 </div>
               ))}
             </div>

@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import { parseISO, isPast, startOfWeek, startOfMonth, isAfter, isBefore } from 'date-fns'
+import { parseISO, isPast, startOfWeek, startOfMonth, isAfter } from 'date-fns'
 import type { Task } from '../../types/task'
 import { BRANCHES, BRANCH_COLORS } from '../../constants/branches'
 
@@ -18,15 +18,11 @@ export function AnalyticsView({ tasks }: AnalyticsViewProps) {
     ).length
 
     const doneThisWeek = tasks.filter(t =>
-      t.status === 'Done' &&
-      t.updated_at &&
-      isAfter(parseISO(t.updated_at), weekStart)
+      t.status === 'Done' && t.updated_at && isAfter(parseISO(t.updated_at), weekStart)
     ).length
 
     const doneThisMonth = tasks.filter(t =>
-      t.status === 'Done' &&
-      t.updated_at &&
-      isAfter(parseISO(t.updated_at), monthStart)
+      t.status === 'Done' && t.updated_at && isAfter(parseISO(t.updated_at), monthStart)
     ).length
 
     const branchStats = BRANCHES.map(branch => {
@@ -43,51 +39,59 @@ export function AnalyticsView({ tasks }: AnalyticsViewProps) {
   }, [tasks])
 
   const cards = [
-    { label: 'Total Tugas', value: stats.total, color: 'text-gray-100' },
-    { label: 'Selesai Minggu Ini', value: stats.doneThisWeek, color: 'text-green-400' },
-    { label: 'Selesai Bulan Ini', value: stats.doneThisMonth, color: 'text-blue-400' },
-    { label: 'Terlambat', value: stats.overdue, color: stats.overdue > 0 ? 'text-red-400' : 'text-gray-400' },
+    { label: 'Total Tasks',        value: stats.total,         accent: 'var(--t-text)' },
+    { label: 'Done This Week',     value: stats.doneThisWeek,  accent: '#22c55e' },
+    { label: 'Done This Month',    value: stats.doneThisMonth, accent: 'var(--t-accent)' },
+    { label: 'Overdue',            value: stats.overdue,       accent: stats.overdue > 0 ? '#ef4444' : 'var(--t-text3)' },
   ]
+
+  const statusCounts = {
+    'Not Yet': tasks.filter(t => t.status === 'Not Yet').length,
+    'Ongoing': tasks.filter(t => t.status === 'Ongoing').length,
+    'Done':    tasks.filter(t => t.status === 'Done').length,
+  }
+  const statusColors: Record<string, string> = {
+    'Not Yet': 'var(--t-text3)',
+    'Ongoing': 'var(--t-accent)',
+    'Done':    '#22c55e',
+  }
 
   return (
     <div className="p-6 max-w-3xl mx-auto space-y-6">
-      <h2 className="text-lg font-semibold text-gray-100">Analitik</h2>
+      <h2 className="text-lg font-semibold" style={{ color: 'var(--t-text)' }}>Analytics</h2>
 
       {/* Summary cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         {cards.map(c => (
           <div key={c.label} className="card p-4">
-            <div className={`text-2xl font-bold ${c.color}`}>{c.value}</div>
-            <div className="text-xs text-gray-500 mt-0.5">{c.label}</div>
+            <div className="text-2xl font-bold" style={{ color: c.accent }}>{c.value}</div>
+            <div className="text-xs mt-0.5" style={{ color: 'var(--t-text3)' }}>{c.label}</div>
           </div>
         ))}
       </div>
 
       {/* Branch completion */}
       <div className="card p-4">
-        <h3 className="text-sm font-semibold text-gray-300 mb-4">Progres per Branch</h3>
+        <h3 className="text-sm font-semibold mb-4" style={{ color: 'var(--t-text)' }}>Progress by Branch</h3>
         <div className="space-y-4">
           {stats.branchStats.map(({ branch, total, done, pct, overdue }) => (
             <div key={branch}>
               <div className="flex items-center justify-between mb-1">
                 <div className="flex items-center gap-2">
-                  <span
-                    className="w-2 h-2 rounded-full"
-                    style={{ backgroundColor: BRANCH_COLORS[branch] }}
-                  />
-                  <span className="text-sm text-gray-300">{branch}</span>
+                  <span className="w-2 h-2 rounded-full" style={{ backgroundColor: BRANCH_COLORS[branch] }} />
+                  <span className="text-sm" style={{ color: 'var(--t-text)' }}>{branch}</span>
                   {overdue > 0 && (
-                    <span className="text-xs text-red-400 bg-red-950 px-1 py-0.5 rounded">
-                      {overdue} terlambat
+                    <span className="text-xs text-red-500 bg-red-500/10 px-1 py-0.5 rounded">
+                      {overdue} overdue
                     </span>
                   )}
                 </div>
-                <div className="flex items-center gap-3 text-xs text-gray-500">
+                <div className="flex items-center gap-3 text-xs" style={{ color: 'var(--t-text3)' }}>
                   <span>{done}/{total}</span>
                   <span className="font-semibold" style={{ color: BRANCH_COLORS[branch] }}>{pct}%</span>
                 </div>
               </div>
-              <div className="h-2 bg-gray-800 rounded-full overflow-hidden">
+              <div className="h-2 rounded-full overflow-hidden" style={{ backgroundColor: 'var(--t-hover)' }}>
                 <div
                   className="h-full rounded-full transition-all duration-500"
                   style={{ width: `${pct}%`, backgroundColor: BRANCH_COLORS[branch] }}
@@ -96,51 +100,52 @@ export function AnalyticsView({ tasks }: AnalyticsViewProps) {
             </div>
           ))}
           {stats.branchStats.length === 0 && (
-            <p className="text-sm text-gray-700 text-center py-4">Belum ada data</p>
+            <p className="text-sm text-center py-4" style={{ color: 'var(--t-text4)' }}>No data yet</p>
           )}
         </div>
       </div>
 
       {/* Status breakdown */}
       <div className="card p-4">
-        <h3 className="text-sm font-semibold text-gray-300 mb-4">Breakdown Status</h3>
-        {(() => {
-          const statusCounts = {
-            'Not Yet': tasks.filter(t => t.status === 'Not Yet').length,
-            'Ongoing': tasks.filter(t => t.status === 'Ongoing').length,
-            'Done': tasks.filter(t => t.status === 'Done').length,
-          }
-          const entries = Object.entries(statusCounts)
-          const colors: Record<string, string> = {
-            'Not Yet': '#6B7280',
-            'Ongoing': '#3498DB',
-            'Done': '#1ABC9C',
-          }
-          const labels: Record<string, string> = {
-            'Not Yet': 'Belum',
-            'Ongoing': 'Sedang',
-            'Done': 'Selesai',
-          }
-          return (
-            <div className="flex items-end gap-3 h-24">
-              {entries.map(([status, count]) => {
-                const pct = stats.total > 0 ? (count / stats.total) * 100 : 0
-                return (
-                  <div key={status} className="flex flex-col items-center gap-1 flex-1">
-                    <span className="text-xs font-bold" style={{ color: colors[status] }}>{count}</span>
-                    <div className="w-full rounded-t-md transition-all" style={{
-                      height: `${Math.max(pct, 4)}%`,
-                      backgroundColor: colors[status] + '50',
-                      border: `1px solid ${colors[status]}40`,
-                    }} />
-                    <span className="text-xs text-gray-600">{labels[status]}</span>
-                  </div>
-                )
-              })}
-            </div>
-          )
-        })()}
+        <h3 className="text-sm font-semibold mb-4" style={{ color: 'var(--t-text)' }}>Status Breakdown</h3>
+        <div className="flex items-end gap-4 h-28">
+          {Object.entries(statusCounts).map(([status, count]) => {
+            const pct = stats.total > 0 ? (count / stats.total) * 100 : 0
+            return (
+              <div key={status} className="flex flex-col items-center gap-1 flex-1">
+                <span className="text-xs font-bold" style={{ color: statusColors[status] }}>{count}</span>
+                <div
+                  className="w-full rounded-t-md transition-all"
+                  style={{
+                    height: `${Math.max(pct, 5)}%`,
+                    backgroundColor: statusColors[status],
+                    opacity: 0.6,
+                  }}
+                />
+                <span className="text-xs" style={{ color: 'var(--t-text3)' }}>{status}</span>
+              </div>
+            )
+          })}
+        </div>
       </div>
+
+      {/* Gold highlight — most loaded day */}
+      {stats.total > 0 && (
+        <div
+          className="card p-4 border-l-4"
+          style={{ borderLeftColor: 'var(--t-gold)' }}
+        >
+          <div className="flex items-center gap-2">
+            <span style={{ color: 'var(--t-gold)' }}>✦</span>
+            <span className="text-sm font-medium" style={{ color: 'var(--t-text)' }}>
+              {stats.overdue === 0
+                ? 'All caught up — no overdue tasks!'
+                : `${stats.overdue} task${stats.overdue > 1 ? 's' : ''} past deadline`
+              }
+            </span>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

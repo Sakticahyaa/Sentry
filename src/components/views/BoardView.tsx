@@ -14,10 +14,10 @@ interface BoardViewProps {
   onAdd: (data: Partial<Task>) => Promise<void>
 }
 
-const COLUMNS: { status: Status; label: string; color: string }[] = [
-  { status: 'Not Yet', label: 'Belum', color: 'border-gray-700' },
-  { status: 'Ongoing', label: 'Sedang', color: 'border-blue-500/40' },
-  { status: 'Done', label: 'Selesai', color: 'border-green-500/40' },
+const COLUMNS: { status: Status; label: string; accent: string }[] = [
+  { status: 'Not Yet', label: 'Not Yet',  accent: 'var(--t-text4)' },
+  { status: 'Ongoing', label: 'Ongoing',  accent: 'var(--t-accent)' },
+  { status: 'Done',    label: 'Done',     accent: '#22c55e' },
 ]
 
 export function BoardView({ tasks, onEdit, onDelete, onCycle, onAdd }: BoardViewProps) {
@@ -39,20 +39,19 @@ export function BoardView({ tasks, onEdit, onDelete, onCycle, onAdd }: BoardView
     <div className="p-4 flex flex-col gap-4">
       {/* Branch filter */}
       <div className="flex items-center gap-2 flex-wrap">
-        <span className="text-xs text-gray-600">Filter:</span>
-        <button
-          onClick={() => setBranchFilter(null)}
-          className={`text-xs px-2 py-1 rounded-lg border transition-all ${!branchFilter ? 'border-blue-500/50 bg-blue-500/10 text-blue-400' : 'border-gray-800 text-gray-500 hover:text-gray-300'}`}
-        >
-          Semua
-        </button>
-        {BRANCHES.map(b => (
+        <span className="text-xs" style={{ color: 'var(--t-text4)' }}>Filter:</span>
+        {[null, ...BRANCHES].map(b => (
           <button
-            key={b}
+            key={b ?? 'all'}
             onClick={() => setBranchFilter(b)}
-            className={`text-xs px-2 py-1 rounded-lg border transition-all ${branchFilter === b ? 'border-blue-500/50 bg-blue-500/10 text-blue-400' : 'border-gray-800 text-gray-500 hover:text-gray-300'}`}
+            className="text-xs px-2 py-1 rounded-lg border transition-all"
+            style={{
+              borderColor: branchFilter === b ? 'var(--t-accent)' : 'var(--t-border)',
+              backgroundColor: branchFilter === b ? 'var(--t-accent-sub)' : 'transparent',
+              color: branchFilter === b ? 'var(--t-accent)' : 'var(--t-text3)',
+            }}
           >
-            {b}
+            {b ?? 'All'}
           </button>
         ))}
       </div>
@@ -60,20 +59,28 @@ export function BoardView({ tasks, onEdit, onDelete, onCycle, onAdd }: BoardView
       {/* Columns */}
       <div className="grid grid-cols-3 gap-4">
         {COLUMNS.map(col => {
-          const colTasks = filtered
-            .filter(t => t.status === col.status)
-            .sort((a, b) => a.order - b.order)
+          const colTasks = filtered.filter(t => t.status === col.status).sort((a, b) => a.order - b.order)
 
           return (
             <div
               key={col.status}
-              className={`card p-3 flex flex-col gap-2 min-h-[400px] border-t-2 ${col.color}`}
+              className="rounded-xl border p-3 flex flex-col gap-2 min-h-[400px] border-t-2"
+              style={{
+                backgroundColor: 'var(--t-card)',
+                borderColor: 'var(--t-border)',
+                borderTopColor: col.accent,
+              }}
               onDragOver={e => e.preventDefault()}
               onDrop={e => handleDrop(e, col.status)}
             >
               <div className="flex items-center justify-between mb-1">
-                <span className="text-sm font-semibold text-gray-300">{col.label}</span>
-                <span className="text-xs text-gray-600 bg-gray-800 px-1.5 py-0.5 rounded">{colTasks.length}</span>
+                <span className="text-sm font-semibold" style={{ color: 'var(--t-text)' }}>{col.label}</span>
+                <span
+                  className="text-xs px-1.5 py-0.5 rounded"
+                  style={{ backgroundColor: 'var(--t-hover)', color: 'var(--t-text3)' }}
+                >
+                  {colTasks.length}
+                </span>
               </div>
 
               <div className="space-y-2 flex-1">
@@ -90,16 +97,19 @@ export function BoardView({ tasks, onEdit, onDelete, onCycle, onAdd }: BoardView
 
               <button
                 onClick={() => setAddingStatus(col.status)}
-                className="flex items-center gap-1 text-xs text-gray-700 hover:text-gray-400 transition-colors py-1"
+                className="flex items-center gap-1 text-xs py-1 transition-colors"
+                style={{ color: 'var(--t-text4)' }}
+                onMouseEnter={e => (e.currentTarget as HTMLButtonElement).style.color = 'var(--t-text2)'}
+                onMouseLeave={e => (e.currentTarget as HTMLButtonElement).style.color = 'var(--t-text4)'}
               >
-                <Plus size={12} /> Tambah
+                <Plus size={12} /> Add task
               </button>
             </div>
           )
         })}
       </div>
 
-      <Modal open={!!addingStatus} onClose={() => setAddingStatus(null)} title="Tugas Baru">
+      <Modal open={!!addingStatus} onClose={() => setAddingStatus(null)} title="New Task">
         <TaskForm
           initial={{ status: addingStatus ?? 'Not Yet', branch: branchFilter ?? undefined }}
           onSubmit={async data => { await onAdd(data); setAddingStatus(null) }}

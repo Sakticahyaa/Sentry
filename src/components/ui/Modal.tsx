@@ -22,10 +22,20 @@ export function Modal({ open, onClose, title, children, size = 'md' }: ModalProp
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
-      <div className={`relative w-full ${widths[size]} card shadow-2xl`}>
-        <div className="flex items-center justify-between p-4 border-b border-gray-800">
-          <h2 className="text-base font-semibold text-gray-100">{title}</h2>
+      <div
+        className="absolute inset-0 backdrop-blur-sm"
+        style={{ backgroundColor: 'rgba(0,0,0,0.35)' }}
+        onClick={onClose}
+      />
+      <div
+        className={`relative w-full ${widths[size]} rounded-xl shadow-2xl border`}
+        style={{ backgroundColor: 'var(--t-card)', borderColor: 'var(--t-border)' }}
+      >
+        <div
+          className="flex items-center justify-between p-4 border-b"
+          style={{ borderColor: 'var(--t-border)' }}
+        >
+          <h2 className="text-base font-semibold" style={{ color: 'var(--t-text)' }}>{title}</h2>
           <button onClick={onClose} className="btn-ghost p-1.5">
             <X size={16} />
           </button>
