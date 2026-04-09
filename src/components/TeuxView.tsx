@@ -22,6 +22,9 @@ const BLOCK_ORDER: Record<string, number> = {
 
 function sortTasks(tasks: Task[]): Task[] {
   return [...tasks].sort((a, b) => {
+    const aDone = a.status === 'Done' ? 1 : 0
+    const bDone = b.status === 'Done' ? 1 : 0
+    if (aDone !== bDone) return aDone - bDone
     const aOrd = a.time_block != null ? (BLOCK_ORDER[a.time_block] ?? 10) : 10
     const bOrd = b.time_block != null ? (BLOCK_ORDER[b.time_block] ?? 10) : 10
     if (aOrd !== bOrd) return aOrd - bOrd
