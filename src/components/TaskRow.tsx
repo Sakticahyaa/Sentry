@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Pencil } from 'lucide-react'
+import { Square, CheckSquare } from 'lucide-react'
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import type { Task } from '../types/task'
@@ -17,9 +17,8 @@ interface TaskRowProps {
 
 export function TaskRow({ task, displayId, onToggleDone, onEdit, onDelete }: TaskRowProps) {
   const [editing, setEditing] = useState(false)
-  const [confirming, setConfirming] = useState(false)
-  const [hovered, setHovered] = useState(false)
   const [deleting, setDeleting] = useState(false)
+  const [hovered, setHovered] = useState(false)
 
   const isDone = task.status === 'Done'
   const barColor = useBranchColor(task.branch ?? null)
@@ -51,10 +50,28 @@ export function TaskRow({ task, displayId, onToggleDone, onEdit, onDelete }: Tas
         className="relative flex items-center select-none cursor-grab active:cursor-grabbing"
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}
-        onClick={() => onToggleDone(task)}
         {...attributes}
         {...listeners}
       >
+        {/* Checkbox — slides in from left on hover */}
+        <div style={{
+          width: hovered || isDone ? 28 : 0,
+          overflow: 'hidden',
+          flexShrink: 0,
+          transition: 'width 0.15s ease',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}>
+          <button
+            onPointerDown={e => e.stopPropagation()}
+            onClick={e => { e.stopPropagation(); onToggleDone(task) }}
+            style={{ color: isDone ? '#8a9499' : '#cbd3d6', display: 'flex', alignItems: 'center' }}
+          >
+            {isDone ? <CheckSquare size={15} /> : <Square size={15} />}
+          </button>
+        </div>
+
         {/* Branch color strip */}
         <div style={{
           width: 3, borderRadius: 3,
@@ -64,8 +81,13 @@ export function TaskRow({ task, displayId, onToggleDone, onEdit, onDelete }: Tas
           margin: '5px 10px 5px 0',
         }} />
 
-        {/* Content */}
-        <div className="flex-1 flex flex-col justify-center py-1.5 min-w-0">
+        {/* Content — click to edit */}
+        <div
+          className="flex-1 flex flex-col justify-center py-1.5 pr-2 min-w-0"
+          onPointerDown={e => e.stopPropagation()}
+          onClick={() => setEditing(true)}
+          style={{ cursor: 'pointer' }}
+        >
           <span style={{
             fontFamily: "'DM Mono', monospace",
             fontSize: 14,
@@ -88,23 +110,6 @@ export function TaskRow({ task, displayId, onToggleDone, onEdit, onDelete }: Tas
           }}>
             {displayId}{meta ? ` · ${meta}` : ''}
           </span>
-        </div>
-
-        {/* Hover actions */}
-        <div
-          className="flex items-center gap-0.5 px-1 shrink-0"
-          style={{ opacity: hovered ? 1 : 0, transition: 'opacity 0.1s' }}
-          onClick={e => e.stopPropagation()}
-          onPointerDown={e => e.stopPropagation()}
-        >
-          <button
-            onClick={() => setEditing(true)}
-            className="p-1 rounded transition-colors hover:bg-[#f0f0f0]"
-            style={{ color: '#8a9499' }}
-            title="Edit"
-          >
-            <Pencil size={11} />
-          </button>
         </div>
       </div>
 
