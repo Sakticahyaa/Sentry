@@ -1,4 +1,4 @@
-import { LayoutDashboard, Calendar, Kanban, Tag, Plus, LogOut, TrendingUp } from 'lucide-react'
+import { LayoutDashboard, Calendar, Kanban, Tag, Plus, LogOut, TrendingUp, Columns } from 'lucide-react'
 import type { Branch, ViewType } from '../types/task'
 import { BRANCHES, BRANCH_COLORS } from '../constants/branches'
 
@@ -12,6 +12,7 @@ interface SidebarProps {
 }
 
 const VIEWS: { id: ViewType; label: string; icon: React.ReactNode }[] = [
+  { id: 'teux',      label: 'Teux',      icon: <Columns size={15} /> },
   { id: 'daily',     label: 'Daily',     icon: <LayoutDashboard size={15} /> },
   { id: 'weekly',    label: 'Weekly',    icon: <Calendar size={15} /> },
   { id: 'board',     label: 'Board',     icon: <Kanban size={15} /> },

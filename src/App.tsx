@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
-import { startOfWeek, addDays, format } from 'date-fns'
+import { startOfWeek, addDays, format, isToday } from 'date-fns'
+import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { useAuth } from './hooks/useAuth'
 import { useTasks } from './hooks/useTasks'
 import { useBranches, BranchesContext } from './hooks/useBranches'
@@ -110,7 +111,7 @@ export default function App() {
       : tasks
 
     const viewTitles: Record<ViewType, string> = {
-      daily: 'Daily', weekly: 'Weekly', board: 'Board',
+      teux: 'Teux', daily: 'Daily', weekly: 'Weekly', board: 'Board',
       branch: 'Branch', analytics: 'Analytics',
     }
 
@@ -142,11 +143,40 @@ export default function App() {
                 onToggleTheme={toggleTheme}
               />
             </div>
-            <div className="flex-1 overflow-auto">
+            <div className="flex-1 overflow-hidden flex flex-col">
               {loading ? (
                 <div className="flex items-center justify-center h-full">
                   <span className="text-sm" style={{ color: '#cbd3d6' }}>Loading tasks...</span>
                 </div>
+              ) : legacyView === 'teux' ? (
+                <>
+                  {/* Mini nav bar for teux-in-legacy */}
+                  <div className="flex items-center gap-2 px-4 py-2 shrink-0" style={{ borderBottom: '1px solid var(--t-border)' }}>
+                    <button className="btn-ghost px-1.5 py-1" onClick={() => setStartDate(addDays(startDate, -(colCount === 7 ? 7 : 1)))}><ChevronLeft size={14} /></button>
+                    <button className="btn-ghost px-1.5 py-1" onClick={() => setStartDate(addDays(startDate, colCount === 7 ? 7 : 1))}><ChevronRight size={14} /></button>
+                    <span className="text-xs font-medium flex-1" style={{ color: 'var(--t-text)' }}>
+                      {colCount === 1
+                        ? format(startDate, 'EEEE, MMMM d, yyyy')
+                        : `${format(startDate, 'MMM d')} – ${format(addDays(startDate, colCount - 1), 'MMM d, yyyy')}`}
+                    </span>
+                    <div className="flex gap-1">
+                      {([1, 3, 7] as ColCount[]).map(n => (
+                        <button key={n} onClick={() => handleSetColCount(n)} className={`pill ${colCount === n ? 'active' : ''}`}>{n}</button>
+                      ))}
+                    </div>
+                    <button className="btn-ghost text-xs px-2 py-1" onClick={handleToday}>Today</button>
+                  </div>
+                  <TeuxView
+                    colCount={colCount}
+                    startDate={startDate}
+                    tasks={tasks}
+                    onToggleDone={handleToggleDone}
+                    onEdit={editTask}
+                    onDelete={removeTask}
+                    onAdd={addTask}
+                    onReorder={reorder}
+                  />
+                </>
               ) : legacyView === 'daily' ? (
                 <DailyView
                   tasks={filteredTasks}
