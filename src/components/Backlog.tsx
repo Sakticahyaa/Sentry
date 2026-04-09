@@ -61,10 +61,11 @@ export function Backlog({ tasks, onToggleDone, onEdit, onDelete, onClose }: Back
               No backlog tasks
             </p>
           ) : (
-            backlogTasks.map(task => (
+            backlogTasks.map((task, i) => (
               <TaskRow
                 key={task.id}
                 task={task}
+                index={i}
                 onToggleDone={onToggleDone}
                 onEdit={onEdit}
                 onDelete={onDelete}
