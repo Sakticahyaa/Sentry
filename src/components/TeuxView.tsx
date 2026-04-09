@@ -90,7 +90,7 @@ function DayColumn({ date, tasks, displayIds, onToggleDone, onEdit, onDelete, on
       </div>
 
       {/* Tasks */}
-      <div className="flex-1 px-3 pt-2">
+      <div className="flex-1 pt-2">
         <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
           <SortableContext items={dayTasks.map(t => t.id)} strategy={verticalListSortingStrategy}>
             {dayTasks.map(task => (

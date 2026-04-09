@@ -61,7 +61,7 @@ export function TaskRow({ task, displayId, onToggleDone, onEdit, onDelete }: Tas
           backgroundColor: barColor,
           flexShrink: 0,
           alignSelf: 'stretch',
-          margin: '5px 10px 5px 13px',
+          margin: '5px 10px 5px 0',
         }} />
 
         {/* Content */}
