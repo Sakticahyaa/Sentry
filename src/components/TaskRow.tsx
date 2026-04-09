@@ -7,13 +7,12 @@ import { TaskForm } from './TaskForm'
 
 interface TaskRowProps {
   task: Task
-  index: number
   onToggleDone: (task: Task) => Promise<void>
   onEdit: (id: string, updates: Partial<Task>) => Promise<void>
   onDelete: (id: string) => Promise<void>
 }
 
-export function TaskRow({ task, index, onToggleDone, onEdit, onDelete }: TaskRowProps) {
+export function TaskRow({ task, onToggleDone, onEdit, onDelete }: TaskRowProps) {
   const [editing, setEditing] = useState(false)
   const [hovered, setHovered] = useState(false)
 
@@ -45,10 +44,7 @@ export function TaskRow({ task, index, onToggleDone, onEdit, onDelete }: TaskRow
     <>
       <div
         className="relative flex items-stretch cursor-pointer select-none"
-        style={{
-          minHeight: '34px',
-          backgroundColor: index % 2 === 0 ? '#f4f6f7' : 'transparent',
-        }}
+        style={{ minHeight: '34px', borderBottom: '1px solid rgba(35,42,46,0.08)', marginLeft: 13, marginRight: 8 }}
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}
         onClick={handleClick}

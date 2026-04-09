@@ -73,11 +73,10 @@ function DayColumn({ date, tasks, onToggleDone, onEdit, onDelete, onAdd, isLast 
 
       {/* Tasks */}
       <div className="flex-1 px-3 pt-2">
-        {dayTasks.map((task, i) => (
+        {dayTasks.map(task => (
           <TaskRow
             key={task.id}
             task={task}
-            index={i}
             onToggleDone={onToggleDone}
             onEdit={onEdit}
             onDelete={onDelete}
