@@ -1,0 +1,69 @@
+import { createClient } from '@supabase/supabase-js'
+import type { Task, TaskInsert, TaskUpdate, Filters } from '../types/task'
+
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL as string
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string
+
+export const supabase = createClient(supabaseUrl, supabaseAnonKey)
+
+// ─── Tasks API ────────────────────────────────────────────────────────────────
+
+export async function fetchTasks(filters?: Partial<Filters>): Promise<Task[]> {
+  let query = supabase
+    .from('tasks')
+    .select('*')
+    .order('order', { ascending: true })
+    .order('created_at', { ascending: false })
+
+  if (filters?.branch) query = query.eq('branch', filters.branch)
+  if (filters?.status) query = query.eq('status', filters.status)
+  if (filters?.time_block) query = query.eq('time_block', filters.time_block)
+  if (filters?.priority) query = query.eq('priority', filters.priority)
+  if (filters?.assigned_date_from) query = query.gte('assigned_date', filters.assigned_date_from)
+  if (filters?.assigned_date_to) query = query.lte('assigned_date', filters.assigned_date_to)
+  if (filters?.search) {
+    query = query.or(`title.ilike.%${filters.search}%,notes.ilike.%${filters.search}%`)
+  }
+
+  const { data, error } = await query
+  if (error) throw error
+  return data as Task[]
+}
+
+export async function createTask(task: Partial<TaskInsert>): Promise<Task> {
+  const { data, error } = await supabase
+    .from('tasks')
+    .insert([task])
+    .select()
+    .single()
+  if (error) throw error
+  return data as Task
+}
+
+export async function updateTask(id: string, updates: TaskUpdate): Promise<Task> {
+  const { data, error } = await supabase
+    .from('tasks')
+    .update(updates)
+    .eq('id', id)
+    .select()
+    .single()
+  if (error) throw error
+  return data as Task
+}
+
+export async function deleteTask(id: string): Promise<void> {
+  const { error } = await supabase.from('tasks').delete().eq('id', id)
+  if (error) throw error
+}
+
+export async function bulkUpdateTasks(ids: string[], updates: TaskUpdate): Promise<void> {
+  const { error } = await supabase.from('tasks').update(updates).in('id', ids)
+  if (error) throw error
+}
+
+export async function reorderTasks(updates: { id: string; order: number }[]): Promise<void> {
+  const promises = updates.map(({ id, order }) =>
+    supabase.from('tasks').update({ order }).eq('id', id)
+  )
+  await Promise.all(promises)
+}
