@@ -73,3 +73,44 @@ export async function reorderTasks(updates: { id: string; order: number }[]): Pr
   )
   await Promise.all(promises)
 }
+
+// ─── Branches API ─────────────────────────────────────────────────────────────
+
+import type { BranchRecord } from '../types/task'
+
+export async function fetchBranches(): Promise<BranchRecord[]> {
+  const { data, error } = await supabase
+    .from('branches')
+    .select('*')
+    .order('created_at', { ascending: true })
+  if (error) throw error
+  return data as BranchRecord[]
+}
+
+export async function createBranch(name: string, color: string): Promise<BranchRecord> {
+  const { data, error } = await supabase
+    .from('branches')
+    .insert([{ name, color }])
+    .select()
+    .single()
+  if (error) throw error
+  return data as BranchRecord
+}
+
+export async function deleteBranch(id: string, name: string): Promise<void> {
+  // Nullify branch on all tasks that had this branch
+  await supabase.from('tasks').update({ branch: null }).eq('branch', name)
+  const { error } = await supabase.from('branches').delete().eq('id', id)
+  if (error) throw error
+}
+
+export async function updateBranch(id: string, updates: Partial<Pick<BranchRecord, 'name' | 'color'>>): Promise<BranchRecord> {
+  const { data, error } = await supabase
+    .from('branches')
+    .update(updates)
+    .eq('id', id)
+    .select()
+    .single()
+  if (error) throw error
+  return data as BranchRecord
+}

@@ -1,19 +1,24 @@
-export type Branch = 'Meroket' | 'Thesis' | 'Yutaka' | 'Roetix' | 'Batin' | 'Hyke'
+export type Branch = string   // dynamic — stored in branches table
 export type Status = 'Not Yet' | 'Ongoing' | 'Done'
 export type TimeBlock = 'Q1' | 'Q2' | 'Q3' | 'Q4' | 'Q5' | 'Q6' | 'H0' | 'H1' | 'H2' | 'H3'
 export type Priority = 1 | 2 | 3 | 4 | 5
-export type ViewType = 'daily' | 'weekly' | 'board' | 'branch' | 'analytics'
+
+export interface BranchRecord {
+  id: string
+  name: string
+  color: string
+}
 
 export interface Task {
   id: string
   title: string
   branch: Branch | null
-  deadline: string | null        // YYYY-MM-DD
+  deadline: string | null
   priority: Priority
   status: Status
   notes: string | null
-  assigned_date: string | null   // YYYY-MM-DD
-  estimated_time: number | null  // hours
+  assigned_date: string | null
+  estimated_time: number | null
   time_block: TimeBlock | null
   order: number
   created_at: string

@@ -47,39 +47,34 @@ function DayColumn({ date, tasks, onToggleDone, onEdit, onDelete, onAdd, isLast 
   return (
     <div
       className="flex flex-col min-h-full"
-      style={{
-        borderRight: isLast ? 'none' : '1px solid #cbd3d6',
-        minWidth: 0,
-      }}
+      style={{ minWidth: 0 }}
     >
       {/* Day header */}
-      <div
-        className="px-4 pt-4 pb-3 shrink-0"
-        style={{ borderBottom: '1px solid #cbd3d6' }}
-      >
+      <div className="px-4 pt-4 pb-3 shrink-0">
         <div
           className="text-xs font-semibold uppercase tracking-widest truncate"
-          style={{ color: today ? '#232a2e' : '#cbd3d6' }}
+          style={{ color: today ? '#000000' : '#232a2e' }}
         >
           {format(date, 'EEEE')}
         </div>
         <div
           className="text-2xl font-bold leading-tight"
-          style={{ color: today ? '#232a2e' : '#8a9499' }}
+          style={{ color: today ? '#000000' : '#232a2e' }}
         >
           {format(date, 'd')}
         </div>
-        <div className="text-xs truncate" style={{ color: '#cbd3d6' }}>
+        <div className="text-xs truncate" style={{ color: '#8a9499' }}>
           {format(date, 'MMMM yyyy')}
         </div>
       </div>
 
       {/* Tasks */}
       <div className="flex-1 px-3 pt-2">
-        {dayTasks.map(task => (
+        {dayTasks.map((task, i) => (
           <TaskRow
             key={task.id}
             task={task}
+            index={i}
             onToggleDone={onToggleDone}
             onEdit={onEdit}
             onDelete={onDelete}

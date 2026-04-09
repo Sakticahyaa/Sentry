@@ -1,23 +1,24 @@
 import { useState } from 'react'
 import { Pencil, Trash2 } from 'lucide-react'
 import type { Task } from '../types/task'
-import { BRANCH_COLORS } from '../constants/branches'
+import { useBranchColor } from '../hooks/useBranches'
 import { Modal } from './ui/Modal'
 import { TaskForm } from './TaskForm'
 
 interface TaskRowProps {
   task: Task
+  index: number
   onToggleDone: (task: Task) => Promise<void>
   onEdit: (id: string, updates: Partial<Task>) => Promise<void>
   onDelete: (id: string) => Promise<void>
 }
 
-export function TaskRow({ task, onToggleDone, onEdit, onDelete }: TaskRowProps) {
+export function TaskRow({ task, index, onToggleDone, onEdit, onDelete }: TaskRowProps) {
   const [editing, setEditing] = useState(false)
   const [hovered, setHovered] = useState(false)
 
   const isDone = task.status === 'Done'
-  const barColor = task.branch ? BRANCH_COLORS[task.branch] : '#cbd3d6'
+  const barColor = useBranchColor(task.branch ?? null)
 
   // Format: [6-char id] · [title] · [Xh] · [timeblock]
   const parts = [
@@ -44,7 +45,10 @@ export function TaskRow({ task, onToggleDone, onEdit, onDelete }: TaskRowProps) 
     <>
       <div
         className="relative flex items-stretch cursor-pointer select-none"
-        style={{ minHeight: '34px' }}
+        style={{
+          minHeight: '34px',
+          backgroundColor: index % 2 === 0 ? '#f4f6f7' : 'transparent',
+        }}
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}
         onClick={handleClick}
@@ -94,9 +98,6 @@ export function TaskRow({ task, onToggleDone, onEdit, onDelete }: TaskRowProps) 
           </button>
         </div>
       </div>
-
-      {/* Row divider */}
-      <div style={{ height: '1px', backgroundColor: '#cbd3d6', opacity: 0.4 }} />
 
       <Modal open={editing} onClose={() => setEditing(false)} title="Edit Task">
         <TaskForm
