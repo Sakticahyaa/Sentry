@@ -8,6 +8,19 @@
   --muted:   #8a9499;
   --hover:   #f4f6f7;
   --white:   #ffffff;
+
+  /* Legacy view vars */
+  --t-text:       #232a2e;
+  --t-text2:      #3d4a50;
+  --t-text3:      #8a9499;
+  --t-text4:      #8a9499;
+  --t-border:     #cbd3d6;
+  --t-card:       #ffffff;
+  --t-elevated:   #f4f6f7;
+  --t-hover:      #f4f6f7;
+  --t-accent:     #5B6B8A;
+  --t-accent-sub: #eef0f5;
+  --t-gold:       #C9A84C;
 }
 
 @layer base {

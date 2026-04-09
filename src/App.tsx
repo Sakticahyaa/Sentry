@@ -9,9 +9,18 @@ import { TeuxView } from './components/TeuxView'
 import { CalendarView } from './components/CalendarView'
 import { Backlog } from './components/Backlog'
 import { BranchManager } from './components/BranchManager'
+import { Sidebar } from './components/Sidebar'
+import { Header } from './components/Header'
+import { DailyView } from './components/views/DailyView'
+import { WeeklyView } from './components/views/WeeklyView'
+import { BoardView } from './components/views/BoardView'
+import { BranchView } from './components/views/BranchView'
+import { AnalyticsView } from './components/views/AnalyticsView'
+import type { Branch, ViewType } from './types/task'
 
 type ColCount = 1 | 3 | 7
 type ViewMode = 'columns' | 'calendar'
+type Layout = 'teux' | 'legacy'
 
 export default function App() {
   const { user, loading: authLoading, signIn, signOut } = useAuth()
@@ -20,8 +29,14 @@ export default function App() {
   const [startDate, setStartDate]   = useState<Date>(() => startOfWeek(new Date(), { weekStartsOn: 1 }))
   const [showBacklog, setShowBacklog]       = useState(false)
   const [showBranchMgr, setShowBranchMgr]   = useState(false)
+  const [layout, setLayout]                 = useState<Layout>('teux')
 
-  const { tasks, loading, addTask, editTask, removeTask } = useTasks(undefined, !!user)
+  // Legacy view state
+  const [legacyView, setLegacyView]         = useState<ViewType>('daily')
+  const [activeBranch, setActiveBranch]     = useState<Branch | null>(null)
+  const [search, setSearch]                 = useState('')
+
+  const { tasks, loading, addTask, editTask, removeTask, cycleStatus, setTasks } = useTasks(undefined, !!user)
   const { branches, getColor, addBranch, removeBranch, editBranch } = useBranches(!!user)
 
   if (authLoading) {
@@ -46,6 +61,86 @@ export default function App() {
     setView('columns')
   }
 
+  // ── Legacy layout ──────────────────────────────────────────────────────────
+  if (layout === 'legacy') {
+    const filteredTasks = search
+      ? tasks.filter(t =>
+          t.title.toLowerCase().includes(search.toLowerCase()) ||
+          (t.notes ?? '').toLowerCase().includes(search.toLowerCase())
+        )
+      : tasks
+
+    const viewTitles: Record<ViewType, string> = {
+      daily: 'Daily', weekly: 'Weekly', board: 'Board',
+      branch: 'Branch', analytics: 'Analytics',
+    }
+
+    return (
+      <BranchesContext.Provider value={{ branches, getColor }}>
+        <div className="flex h-screen overflow-hidden">
+          <Sidebar
+            view={legacyView}
+            onViewChange={setLegacyView}
+            activeBranch={activeBranch}
+            onBranchChange={setActiveBranch}
+            onAddTask={() => {}}
+            onSignOut={signOut}
+          />
+          <div className="flex flex-col flex-1 overflow-hidden">
+            <Header
+              search={search}
+              onSearchChange={setSearch}
+              title={viewTitles[legacyView]}
+              theme="light"
+              onToggleTheme={() => setLayout('teux')}
+            />
+            <div className="flex-1 overflow-auto">
+              {loading ? (
+                <div className="flex items-center justify-center h-full">
+                  <span className="text-sm" style={{ color: '#cbd3d6' }}>Loading tasks...</span>
+                </div>
+              ) : legacyView === 'daily' ? (
+                <DailyView
+                  tasks={filteredTasks}
+                  onEdit={editTask}
+                  onDelete={removeTask}
+                  onCycle={cycleStatus}
+                  onAdd={addTask}
+                  setTasks={setTasks}
+                />
+              ) : legacyView === 'weekly' ? (
+                <WeeklyView
+                  tasks={filteredTasks}
+                  onEdit={editTask}
+                  onCycle={cycleStatus}
+                />
+              ) : legacyView === 'board' ? (
+                <BoardView
+                  tasks={filteredTasks}
+                  onEdit={editTask}
+                  onDelete={removeTask}
+                  onCycle={cycleStatus}
+                  onAdd={addTask}
+                />
+              ) : legacyView === 'branch' ? (
+                <BranchView
+                  tasks={filteredTasks}
+                  activeBranch={activeBranch}
+                  onEdit={editTask}
+                  onDelete={removeTask}
+                  onCycle={cycleStatus}
+                />
+              ) : (
+                <AnalyticsView tasks={filteredTasks} />
+              )}
+            </div>
+          </div>
+        </div>
+      </BranchesContext.Provider>
+    )
+  }
+
+  // ── Teux layout ────────────────────────────────────────────────────────────
   return (
     <BranchesContext.Provider value={{ branches, getColor }}>
       <div className="flex flex-col" style={{ height: '100vh', overflow: 'hidden' }}>
@@ -60,6 +155,7 @@ export default function App() {
           onBranches={() => setShowBranchMgr(true)}
           onSignOut={signOut}
           backlogCount={backlogCount}
+          onLegacy={() => setLayout('legacy')}
         />
 
         {loading ? (

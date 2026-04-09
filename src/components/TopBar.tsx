@@ -15,6 +15,7 @@ interface TopBarProps {
   onBranches: () => void
   onSignOut: () => void
   backlogCount: number
+  onLegacy: () => void
 }
 
 function NavBtn({ label, onClick }: { label: string; onClick: () => void }) {
@@ -33,7 +34,7 @@ function NavBtn({ label, onClick }: { label: string; onClick: () => void }) {
 
 export function TopBar({
   colCount, setColCount, view, setView,
-  startDate, setStartDate, onBacklog, onBranches, onSignOut, backlogCount,
+  startDate, setStartDate, onBacklog, onBranches, onSignOut, backlogCount, onLegacy,
 }: TopBarProps) {
   const step = colCount === 7 ? 7 : colCount
   const prev = () => setStartDate(addDays(startDate, -step))
@@ -122,6 +123,14 @@ export function TopBar({
             {backlogCount}
           </span>
         )}
+      </button>
+
+      <button
+        onClick={onLegacy}
+        className="btn-ghost text-xs px-2 py-1"
+        title="Switch to legacy view"
+      >
+        Legacy
       </button>
 
       <button onClick={onSignOut} className="btn-ghost px-2 py-1" title="Sign out">
