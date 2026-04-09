@@ -30,7 +30,8 @@ export default function App() {
   const [showAdd, setShowAdd] = useState(false)
 
   const { tasks, loading, filters, addTask, editTask, removeTask, cycleStatus, updateFilter, setTasks } = useTasks(
-    activeBranch ? { branch: activeBranch } : undefined
+    activeBranch ? { branch: activeBranch } : undefined,
+    !!user
   )
 
   if (authLoading) {

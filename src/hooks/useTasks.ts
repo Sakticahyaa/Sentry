@@ -12,13 +12,14 @@ const defaultFilters: Filters = {
   assigned_date_to: null,
 }
 
-export function useTasks(initialFilters?: Partial<Filters>) {
+export function useTasks(initialFilters?: Partial<Filters>, enabled = true) {
   const [tasks, setTasks] = useState<Task[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [filters, setFilters] = useState<Filters>({ ...defaultFilters, ...initialFilters })
 
   const load = useCallback(async () => {
+    if (!enabled) { setLoading(false); return }
     setLoading(true)
     setError(null)
     try {
@@ -29,7 +30,7 @@ export function useTasks(initialFilters?: Partial<Filters>) {
     } finally {
       setLoading(false)
     }
-  }, [filters])
+  }, [filters, enabled])
 
   useEffect(() => {
     load()
