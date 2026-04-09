@@ -75,17 +75,21 @@ export function DailyView({ tasks, onEdit, onDelete, onCycle, onAdd, setTasks }:
         <button onClick={() => setDate(format(subDays(parseISO(date), 1), 'yyyy-MM-dd'))} className="btn-ghost p-1.5">
           <ChevronLeft size={16} />
         </button>
-        <div className="flex-1 text-center">
-          <input
-            type="date"
-            value={date}
-            onChange={e => setDate(e.target.value)}
-            className="bg-transparent font-semibold text-base cursor-pointer outline-none"
-            style={{ color: 'var(--t-text)' }}
-          />
-          {isCurrentDay && (
-            <span className="ml-2 text-xs font-medium" style={{ color: 'var(--t-accent)' }}>Today</span>
-          )}
+        <div className="flex-1 text-center relative">
+          <label className="cursor-pointer">
+            <span className="font-semibold text-base" style={{ color: 'var(--t-text)' }}>
+              {format(parseISO(date), 'EEEE, d MMMM yyyy')}
+            </span>
+            {isCurrentDay && (
+              <span className="ml-2 text-xs font-medium" style={{ color: 'var(--t-accent)' }}>Today</span>
+            )}
+            <input
+              type="date"
+              value={date}
+              onChange={e => setDate(e.target.value)}
+              className="absolute inset-0 opacity-0 cursor-pointer w-full"
+            />
+          </label>
         </div>
         <button onClick={() => setDate(format(addDays(parseISO(date), 1), 'yyyy-MM-dd'))} className="btn-ghost p-1.5">
           <ChevronRight size={16} />
