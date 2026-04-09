@@ -8,9 +8,10 @@ interface TaskFormProps {
   onSubmit: (data: Partial<TaskInsert>) => Promise<void>
   onCancel: () => void
   submitLabel?: string
+  onDelete?: () => void
 }
 
-export function TaskForm({ initial, onSubmit, onCancel, submitLabel = 'Save' }: TaskFormProps) {
+export function TaskForm({ initial, onSubmit, onCancel, submitLabel = 'Save', onDelete }: TaskFormProps) {
   const branches = useBranchList()
   const [form, setForm] = useState<Partial<TaskInsert>>({
     title:          initial?.title          ?? '',
@@ -124,7 +125,12 @@ export function TaskForm({ initial, onSubmit, onCancel, submitLabel = 'Save' }: 
         />
       </div>
 
-      <div className="flex gap-2 justify-end pt-2 border-t" style={{ borderColor: 'var(--t-border)' }}>
+      <div className="flex items-center gap-2 pt-2 border-t" style={{ borderColor: 'var(--t-border)' }}>
+        {onDelete && (
+          <button type="button" className="btn text-white mr-auto" style={{ background: '#dc2626', fontSize: 12 }} onClick={onDelete}>
+            Delete
+          </button>
+        )}
         <button type="button" className="btn-ghost" onClick={onCancel}>Cancel</button>
         <button type="submit" className="btn-primary" disabled={submitting}>
           {submitting ? 'Saving...' : submitLabel}

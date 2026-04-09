@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Pencil, Trash2 } from 'lucide-react'
+import { Pencil } from 'lucide-react'
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import type { Task } from '../types/task'
@@ -19,6 +19,7 @@ export function TaskRow({ task, displayId, onToggleDone, onEdit, onDelete }: Tas
   const [editing, setEditing] = useState(false)
   const [confirming, setConfirming] = useState(false)
   const [hovered, setHovered] = useState(false)
+  const [deleting, setDeleting] = useState(false)
 
   const isDone = task.status === 'Done'
   const barColor = useBranchColor(task.branch ?? null)
@@ -104,42 +105,36 @@ export function TaskRow({ task, displayId, onToggleDone, onEdit, onDelete }: Tas
           >
             <Pencil size={11} />
           </button>
-          <button
-            onClick={() => setConfirming(true)}
-            className="p-1 rounded transition-colors hover:bg-red-50"
-            style={{ color: '#8a9499' }}
-            title="Delete"
-          >
-            <Trash2 size={11} />
-          </button>
         </div>
       </div>
 
       {/* Edit modal */}
-      <Modal open={editing} onClose={() => setEditing(false)} title="Edit Task">
-        <TaskForm
-          initial={task}
-          onSubmit={handleEdit}
-          onCancel={() => setEditing(false)}
-          submitLabel="Update"
-        />
-      </Modal>
-
-      {/* Delete confirmation modal */}
-      <Modal open={confirming} onClose={() => setConfirming(false)} title="Delete Task">
-        <p className="text-sm mb-5" style={{ color: '#232a2e' }}>
-          Delete <strong>"{task.title}"</strong>? This cannot be undone.
-        </p>
-        <div className="flex gap-2 justify-end">
-          <button className="btn-ghost" onClick={() => setConfirming(false)}>Cancel</button>
-          <button
-            className="btn text-white"
-            style={{ background: '#dc2626' }}
-            onClick={() => { setConfirming(false); onDelete(task.id) }}
-          >
-            Delete
-          </button>
-        </div>
+      <Modal open={editing} onClose={() => { setEditing(false); setDeleting(false) }} title="Edit Task">
+        {deleting ? (
+          <div>
+            <p className="text-sm mb-5" style={{ color: '#232a2e' }}>
+              Delete <strong>"{task.title}"</strong>? This cannot be undone.
+            </p>
+            <div className="flex gap-2 justify-end">
+              <button className="btn-ghost" onClick={() => setDeleting(false)}>Cancel</button>
+              <button
+                className="btn text-white"
+                style={{ background: '#dc2626' }}
+                onClick={() => { setEditing(false); setDeleting(false); onDelete(task.id) }}
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        ) : (
+          <TaskForm
+            initial={task}
+            onSubmit={handleEdit}
+            onCancel={() => setEditing(false)}
+            submitLabel="Update"
+            onDelete={() => setDeleting(true)}
+          />
+        )}
       </Modal>
     </>
   )
