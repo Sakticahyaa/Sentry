@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { startOfWeek } from 'date-fns'
+import { useState, useEffect, useRef } from 'react'
+import { startOfWeek, format } from 'date-fns'
 import { useAuth } from './hooks/useAuth'
 import { useTasks } from './hooks/useTasks'
 import { useBranches, BranchesContext } from './hooks/useBranches'
@@ -38,8 +38,20 @@ export default function App() {
   const [search, setSearch]                 = useState('')
 
   const { theme, toggle: toggleTheme } = useTheme()
+  const rolledOver = useRef(false)
   const { tasks, loading, addTask, editTask, removeTask, cycleStatus, setTasks } = useTasks(undefined, !!user)
   const { branches, getColor, addBranch, removeBranch, editBranch } = useBranches(!!user)
+
+  // Auto-roll overdue incomplete tasks to today on first load
+  useEffect(() => {
+    if (loading || rolledOver.current) return
+    rolledOver.current = true
+    const today = format(new Date(), 'yyyy-MM-dd')
+    const overdue = tasks.filter(
+      t => t.assigned_date && t.assigned_date < today && t.status !== 'Done'
+    )
+    overdue.forEach(t => editTask(t.id, { assigned_date: today }))
+  }, [loading])
 
   if (authLoading) {
     return (
