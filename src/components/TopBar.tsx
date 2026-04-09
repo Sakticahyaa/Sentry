@@ -38,12 +38,20 @@ export function TopBar({
 
   return (
     <div
-      className="relative flex items-center gap-1.5 px-3 sm:px-5 shrink-0"
-      style={{ height: 52, borderBottom: '1px solid #cbd3d6', background: '#ffffff' }}
+      className="shrink-0 flex flex-col"
+      style={{ borderBottom: '1px solid #cbd3d6', background: '#ffffff' }}
     >
-      {/* Brand */}
+      {/* Brand — own row on narrow screens, inline on wide */}
+      <div className="flex items-center justify-center lg:hidden" style={{ height: 30, borderBottom: '1px solid #f0f2f3' }}>
+        <span className="text-xs font-bold tracking-[0.2em] uppercase" style={{ color: '#232a2e' }}>
+          Sentry
+        </span>
+      </div>
+
+    <div className="relative flex items-center gap-1.5 px-3 sm:px-5" style={{ height: 52 }}>
+      {/* Brand — centered inline on wide screens only */}
       <span
-        className="absolute left-1/2 -translate-x-1/2 text-xs font-bold tracking-[0.2em] uppercase pointer-events-none"
+        className="hidden lg:block absolute left-1/2 -translate-x-1/2 text-xs font-bold tracking-[0.2em] uppercase pointer-events-none"
         style={{ color: '#232a2e' }}
       >
         Sentry
@@ -137,6 +145,7 @@ export function TopBar({
       <button onClick={onSignOut} className="btn-ghost px-2 py-1" title="Sign out">
         <LogOut size={14} />
       </button>
+    </div>
     </div>
   )
 }
