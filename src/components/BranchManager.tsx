@@ -44,7 +44,7 @@ export function BranchManager({ branches, onAdd, onDelete, onEdit, onClose }: Br
   return (
     <>
       <div className="fixed inset-0 z-40" style={{ background: 'rgba(35,42,46,0.15)' }} onClick={onClose} />
-      <div className="fixed top-0 right-0 h-full z-50 flex flex-col" style={{ width: 320, background: '#ffffff', borderLeft: '1px solid #cbd3d6' }}>
+      <div className="fixed top-0 right-0 h-full z-50 flex flex-col" style={{ width: 'min(320px, 100vw)', background: '#ffffff', borderLeft: '1px solid #cbd3d6' }}>
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-4 shrink-0" style={{ borderBottom: '1px solid #cbd3d6' }}>
           <div>

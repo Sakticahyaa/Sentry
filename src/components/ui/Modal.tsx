@@ -21,14 +21,14 @@ export function Modal({ open, onClose, title, children, size = 'md' }: ModalProp
   const widths = { sm: 'max-w-sm', md: 'max-w-lg', lg: 'max-w-2xl' }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center sm:p-4">
       <div
         className="absolute inset-0"
         style={{ background: 'rgba(35,42,46,0.2)' }}
         onClick={onClose}
       />
       <div
-        className={`relative w-full ${widths[size]} rounded-lg shadow-xl`}
+        className={`relative w-full ${widths[size]} rounded-t-xl sm:rounded-lg shadow-xl`}
         style={{ background: '#ffffff', border: '1px solid #cbd3d6' }}
       >
         <div
@@ -40,7 +40,7 @@ export function Modal({ open, onClose, title, children, size = 'md' }: ModalProp
             <X size={15} />
           </button>
         </div>
-        <div className="px-5 py-4 max-h-[80vh] overflow-y-auto">{children}</div>
+        <div className="px-5 py-4 overflow-y-auto" style={{ maxHeight: '80dvh' }}>{children}</div>
       </div>
     </div>
   )

@@ -108,7 +108,7 @@ function DayColumn({ date, tasks, displayIds, onToggleDone, onEdit, onDelete, on
 
         <button
           onClick={() => onAdd(key)}
-          className="flex items-center gap-1 w-full py-1.5 mt-1 text-xs transition-colors"
+          className="flex items-center gap-1 w-full py-2.5 mt-1 text-xs transition-colors"
           style={{ color: '#cbd3d6' }}
           onMouseEnter={e => (e.currentTarget.style.color = '#8a9499')}
           onMouseLeave={e => (e.currentTarget.style.color = '#cbd3d6')}

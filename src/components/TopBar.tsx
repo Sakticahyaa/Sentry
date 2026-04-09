@@ -21,20 +21,6 @@ interface TopBarProps {
   onToday: () => void
 }
 
-function NavBtn({ label, onClick }: { label: string; onClick: () => void }) {
-  return (
-    <button
-      onClick={onClick}
-      className="flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded transition-all"
-      style={{ color: '#232a2e', border: '1px solid #cbd3d6' }}
-      onMouseEnter={e => (e.currentTarget.style.borderColor = '#232a2e')}
-      onMouseLeave={e => (e.currentTarget.style.borderColor = '#cbd3d6')}
-    >
-      {label}
-    </button>
-  )
-}
-
 export function TopBar({
   colCount, setColCount, view, setView,
   startDate, setStartDate, onBacklog, onBranches, onSignOut, backlogCount, onLegacy,
@@ -45,14 +31,14 @@ export function TopBar({
   const next = () => setStartDate(addDays(startDate, step))
 
   const dateLabel = () => {
-    if (colCount === 1) return format(startDate, 'EEEE, MMMM d, yyyy')
+    if (colCount === 1) return format(startDate, 'EEE, MMM d')
     const end = addDays(startDate, colCount - 1)
-    return `${format(startDate, 'MMMM d')} – ${format(end, 'MMMM d, yyyy')}`
+    return `${format(startDate, 'MMM d')} – ${format(end, 'MMM d')}`
   }
 
   return (
     <div
-      className="relative flex items-center gap-2 px-5 shrink-0"
+      className="relative flex items-center gap-1.5 px-3 sm:px-5 shrink-0"
       style={{ height: 52, borderBottom: '1px solid #cbd3d6', background: '#ffffff' }}
     >
       {/* Brand */}
@@ -62,6 +48,7 @@ export function TopBar({
       >
         Sentry
       </span>
+
       {/* Nav arrows */}
       {view === 'columns' && (
         <div className="flex items-center gap-0.5">
@@ -71,15 +58,15 @@ export function TopBar({
       )}
 
       {/* Date label */}
-      <span className="text-sm font-medium" style={{ color: '#232a2e', minWidth: 160 }}>
+      <span className="text-xs sm:text-sm font-medium" style={{ color: '#232a2e' }}>
         {view === 'columns' ? dateLabel() : 'Calendar'}
       </span>
 
       <div className="flex-1" />
 
-      {/* Col pills */}
+      {/* Col pills — hidden on mobile */}
       {view === 'columns' && (
-        <div className="flex items-center gap-1">
+        <div className="hidden sm:flex items-center gap-1">
           {([1, 3, 7] as ColCount[]).map(n => (
             <button key={n} onClick={() => setColCount(n)} className={`pill ${colCount === n ? 'active' : ''}`}>
               {n}
@@ -97,35 +84,37 @@ export function TopBar({
         <Calendar size={13} />
       </button>
 
-      {/* Today */}
+      {/* Today — hidden on mobile */}
       {view === 'columns' && (
-        <button onClick={onToday} className="btn-ghost text-xs px-2 py-1">
+        <button onClick={onToday} className="hidden sm:block btn-ghost text-xs px-2 py-1">
           Today
         </button>
       )}
 
-      <div className="w-px h-4 shrink-0" style={{ background: '#cbd3d6' }} />
+      <div className="hidden sm:block w-px h-4 shrink-0" style={{ background: '#cbd3d6' }} />
 
-      {/* Branches */}
+      {/* Branches — icon only on mobile */}
       <button
         onClick={onBranches}
-        className="flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded transition-all"
+        className="flex items-center gap-1.5 text-xs font-medium px-2 sm:px-2.5 py-1 rounded transition-all"
         style={{ color: '#232a2e', border: '1px solid #cbd3d6' }}
         onMouseEnter={e => (e.currentTarget.style.borderColor = '#232a2e')}
         onMouseLeave={e => (e.currentTarget.style.borderColor = '#cbd3d6')}
+        title="Branches"
       >
-        <GitBranch size={12} /> Branches
+        <GitBranch size={12} />
+        <span className="hidden sm:inline">Branches</span>
       </button>
 
       {/* Backlog */}
       <button
         onClick={onBacklog}
-        className="flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded transition-all"
+        className="flex items-center gap-1.5 text-xs font-medium px-2 sm:px-2.5 py-1 rounded transition-all"
         style={{ color: '#232a2e', border: '1px solid #cbd3d6' }}
         onMouseEnter={e => (e.currentTarget.style.borderColor = '#232a2e')}
         onMouseLeave={e => (e.currentTarget.style.borderColor = '#cbd3d6')}
       >
-        Backlog
+        <span className="hidden sm:inline">Backlog</span>
         {backlogCount > 0 && (
           <span
             className="inline-flex items-center justify-center rounded-full text-white"
@@ -136,11 +125,8 @@ export function TopBar({
         )}
       </button>
 
-      <button
-        onClick={onLegacy}
-        className="btn-ghost text-xs px-2 py-1"
-        title="Switch to legacy view"
-      >
+      {/* Legacy — hidden on mobile */}
+      <button onClick={onLegacy} className="hidden sm:block btn-ghost text-xs px-2 py-1">
         Legacy
       </button>
 

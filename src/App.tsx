@@ -53,6 +53,17 @@ export default function App() {
 
   const { theme, toggle: toggleTheme } = useTheme()
   const rolledOver = useRef(false)
+
+  // Force 1-col on mobile
+  useEffect(() => {
+    const mq = window.matchMedia('(max-width: 640px)')
+    const apply = (matches: boolean) => {
+      if (matches) { setColCount(1); setStartDate(new Date()) }
+    }
+    apply(mq.matches)
+    mq.addEventListener('change', (e) => apply(e.matches))
+    return () => mq.removeEventListener('change', (e) => apply(e.matches))
+  }, [])
   const { tasks, loading, addTask, editTask, removeTask, cycleStatus, reorder, setTasks } = useTasks(undefined, !!user)
   const { branches, getColor, addBranch, removeBranch, editBranch } = useBranches(!!user)
 
