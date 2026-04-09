@@ -14,11 +14,9 @@ interface TaskRowProps {
   onDelete: (id: string) => Promise<void>
 }
 
-type Zone = 'left' | 'center' | 'right' | null
-
 export function TaskRow({ task, displayId, onToggleDone, onEdit, onDelete }: TaskRowProps) {
   const [editing, setEditing] = useState(false)
-  const [zone, setZone] = useState<Zone>(null)
+  const [hovered, setHovered] = useState(false)
 
   const isDone = task.status === 'Done'
   const barColor = useBranchColor(task.branch ?? null)
@@ -30,15 +28,6 @@ export function TaskRow({ task, displayId, onToggleDone, onEdit, onDelete }: Tas
     task.time_block ?? null,
     task.priority ? `P${task.priority}` : null,
   ].filter(Boolean).join(' · ')
-
-  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    const rect = e.currentTarget.getBoundingClientRect()
-    const x = e.clientX - rect.left
-    const w = rect.width
-    if (x < 58) setZone('left')
-    else if (x > w - 52) setZone('right')
-    else setZone('center')
-  }
 
   const handleEdit = async (updates: Partial<Task>) => {
     await onEdit(task.id, updates)
@@ -68,23 +57,22 @@ export function TaskRow({ task, displayId, onToggleDone, onEdit, onDelete }: Tas
           opacity: isDragging ? 0.35 : 1,
           minHeight: '36px',
           borderBottom: '1px solid rgba(35,42,46,0.07)',
-          cursor: zone === 'center' ? 'pointer' : 'grab',
         }}
-        className="relative flex items-center select-none"
-        onMouseMove={handleMouseMove}
-        onMouseLeave={() => setZone(null)}
+        className="relative flex items-center select-none cursor-grab active:cursor-grabbing"
+        onMouseEnter={() => setHovered(true)}
+        onMouseLeave={() => setHovered(false)}
         {...attributes}
         {...listeners}
       >
-        {/* Done pill — left zone */}
+        {/* Done pill — left */}
         <div style={{
-          width: zone === 'left' ? 50 : 0,
+          width: hovered ? 50 : 0,
           overflow: 'hidden',
           flexShrink: 0,
           transition: 'width 0.13s ease',
           display: 'flex',
           alignItems: 'center',
-          paddingRight: zone === 'left' ? 6 : 0,
+          paddingRight: hovered ? 6 : 0,
         }}>
           <button
             onPointerDown={e => e.stopPropagation()}
@@ -109,11 +97,12 @@ export function TaskRow({ task, displayId, onToggleDone, onEdit, onDelete }: Tas
           margin: '5px 10px 5px 0',
         }} />
 
-        {/* Content — click to edit only from center zone */}
+        {/* Content — click to edit */}
         <div
           className="flex-1 flex flex-col justify-center py-1.5 min-w-0"
           onPointerDown={e => e.stopPropagation()}
-          onClick={() => { if (zone === 'center') setEditing(true) }}
+          onClick={() => setEditing(true)}
+          style={{ cursor: 'pointer' }}
         >
           <span style={{
             fontFamily: "'DM Mono', monospace",
@@ -139,15 +128,15 @@ export function TaskRow({ task, displayId, onToggleDone, onEdit, onDelete }: Tas
           </span>
         </div>
 
-        {/* Del pill — right zone */}
+        {/* Del pill — right */}
         <div style={{
-          width: zone === 'right' ? 46 : 0,
+          width: hovered ? 46 : 0,
           overflow: 'hidden',
           flexShrink: 0,
           transition: 'width 0.13s ease',
           display: 'flex',
           alignItems: 'center',
-          paddingLeft: zone === 'right' ? 6 : 0,
+          paddingLeft: hovered ? 6 : 0,
         }}>
           <button
             onPointerDown={e => e.stopPropagation()}
