@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { GripVertical, Pencil, Trash2, Clock, Calendar, CheckCircle2, Circle, Timer } from 'lucide-react'
+import { GripVertical, Pencil, Trash2, Clock, Calendar } from 'lucide-react'
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import type { Task } from '../types/task'
@@ -12,11 +12,11 @@ interface TaskCardProps {
   task: Task
   onEdit: (id: string, updates: Partial<Task>) => Promise<void>
   onDelete: (id: string) => Promise<void>
-  onCycle: (task: Task) => Promise<void>
+  onCycle?: (task: Task) => Promise<void>
   isDraggable?: boolean
 }
 
-export function TaskCard({ task, onEdit, onDelete, onCycle, isDraggable = true }: TaskCardProps) {
+export function TaskCard({ task, onEdit, onDelete, isDraggable = true }: TaskCardProps) {
   const [editing, setEditing] = useState(false)
   const [deleting, setDeleting] = useState(false)
 
@@ -44,12 +44,6 @@ export function TaskCard({ task, onEdit, onDelete, onCycle, isDraggable = true }
   }
 
   const dl = deadlineLabel()
-
-  const statusIcon = () => {
-    if (task.status === 'Done')    return <CheckCircle2 size={15} className="text-green-500" />
-    if (task.status === 'Ongoing') return <Timer size={15} style={{ color: 'var(--t-accent)' }} />
-    return <Circle size={15} style={{ color: 'var(--t-text4)' }} />
-  }
 
   const handleEdit = async (updates: Partial<Task>) => {
     await onEdit(task.id, updates)
@@ -80,14 +74,6 @@ export function TaskCard({ task, onEdit, onDelete, onCycle, isDraggable = true }
               <GripVertical size={14} />
             </div>
           )}
-
-          <button
-            onClick={() => onCycle(task)}
-            className="mt-0.5 shrink-0 hover:scale-110 transition-transform"
-            title={`Status: ${task.status}`}
-          >
-            {statusIcon()}
-          </button>
 
           <div className="flex-1 min-w-0">
             <p
