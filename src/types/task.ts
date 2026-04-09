@@ -1,5 +1,5 @@
 export type Branch = string   // dynamic — stored in branches table
-export type ViewType = 'daily' | 'weekly' | 'board' | 'branch' | 'analytics' | 'teux'
+export type ViewType = 'daily' | 'board' | 'branch' | 'teux'
 export type Status = 'Not Yet' | 'Ongoing' | 'Done'
 export type TimeBlock = 'Q1' | 'Q2' | 'Q3' | 'Q4' | 'Q5' | 'Q6' | 'H0' | 'H1' | 'H2' | 'H3'
 export type Priority = 1 | 2 | 3 | 4 | 5

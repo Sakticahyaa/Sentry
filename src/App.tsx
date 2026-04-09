@@ -14,10 +14,8 @@ import { Backlog } from './components/Backlog'
 import { BranchManager } from './components/BranchManager'
 import { Sidebar } from './components/Sidebar'
 import { DailyView } from './components/views/DailyView'
-import { WeeklyView } from './components/views/WeeklyView'
 import { BoardView } from './components/views/BoardView'
 import { BranchView } from './components/views/BranchView'
-import { AnalyticsView } from './components/views/AnalyticsView'
 import { Modal } from './components/ui/Modal'
 import { TaskForm } from './components/TaskForm'
 import type { Branch, ViewType } from './types/task'
@@ -109,7 +107,7 @@ export default function App() {
       <Routes>
 
         {/* ── Teux layout ──────────────────────────────────────────────────── */}
-        <Route path="/teux" element={
+        <Route path="/hall" element={
           <div className="flex flex-col" style={{ height: '100vh', overflow: 'hidden' }}>
             <TopBar
               colCount={colCount}
@@ -123,7 +121,7 @@ export default function App() {
               onBranches={() => setShowBranchMgr(true)}
               onSignOut={signOut}
               backlogCount={backlogCount}
-              onLegacy={() => navigate('/legacy')}
+              onLegacy={() => navigate('/control')}
               theme={theme}
               onToggleTheme={toggleTheme}
             />
@@ -170,7 +168,7 @@ export default function App() {
         } />
 
         {/* ── Legacy layout ─────────────────────────────────────────────────── */}
-        <Route path="/legacy" element={(() => {
+        <Route path="/control" element={(() => {
           const filteredTasks = search
             ? tasks.filter(t =>
                 t.title.toLowerCase().includes(search.toLowerCase()) ||
@@ -187,7 +185,7 @@ export default function App() {
                 onBranchChange={setActiveBranch}
                 onAddTask={() => setShowLegacyAdd(true)}
                 onManageBranches={() => setShowBranchMgr(true)}
-                onSwitchToTeux={() => navigate('/teux')}
+                onSwitchToTeux={() => navigate('/hall')}
                 onSignOut={signOut}
               />
 
@@ -255,14 +253,10 @@ export default function App() {
                     </>
                   ) : legacyView === 'daily' ? (
                     <DailyView tasks={filteredTasks} onEdit={editTask} onDelete={removeTask} onCycle={cycleStatus} onAdd={addTask} setTasks={setTasks} />
-                  ) : legacyView === 'weekly' ? (
-                    <WeeklyView tasks={filteredTasks} onEdit={editTask} onCycle={cycleStatus} />
                   ) : legacyView === 'board' ? (
                     <BoardView tasks={filteredTasks} onEdit={editTask} onDelete={removeTask} onCycle={cycleStatus} onAdd={addTask} />
-                  ) : legacyView === 'branch' ? (
-                    <BranchView tasks={filteredTasks} activeBranch={activeBranch} onEdit={editTask} onDelete={removeTask} onCycle={cycleStatus} />
                   ) : (
-                    <AnalyticsView tasks={filteredTasks} />
+                    <BranchView tasks={filteredTasks} activeBranch={activeBranch} onEdit={editTask} onDelete={removeTask} onCycle={cycleStatus} />
                   )}
                 </div>
               </div>
@@ -290,7 +284,7 @@ export default function App() {
           )
         })()} />
 
-        <Route path="*" element={<Navigate to="/teux" replace />} />
+        <Route path="*" element={<Navigate to="/hall" replace />} />
       </Routes>
     </BranchesContext.Provider>
   )

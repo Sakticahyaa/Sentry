@@ -133,11 +133,9 @@ function DayColumn({ date, tasks, displayIds, hoverable, onToggleDone, onEdit, o
 
 export function TeuxView({ colCount, startDate, tasks, onToggleDone, onEdit, onDelete, onAdd, onReorder }: TeuxViewProps) {
   const [addingDate, setAddingDate] = useState<string | null>(null)
-  const [addingBacklog, setAddingBacklog] = useState(false)
   const displayIds = buildDisplayIds(tasks)
 
   const days = Array.from({ length: colCount }, (_, i) => addDays(startDate, i))
-  const backlogTasks = tasks.filter(t => !t.assigned_date)
 
   const dayColumns = days.map(day => (
     <DayColumn
@@ -154,84 +152,6 @@ export function TeuxView({ colCount, startDate, tasks, onToggleDone, onEdit, onD
     />
   ))
 
-  // ── 3-day layout: backlog on left + 3 hoverable day columns ──────────────
-  if (colCount === 3) {
-    return (
-      <div className="flex flex-1 overflow-hidden" style={{ height: 'calc(100vh - 52px)' }}>
-
-        {/* Backlog sidebar */}
-        <div
-          className="w-52 shrink-0 flex flex-col overflow-hidden"
-          style={{ borderRight: '1px solid #cbd3d6' }}
-        >
-          <div className="px-4 pt-4 pb-2 shrink-0" style={{ borderBottom: '1px solid #f0f2f3' }}>
-            <div className="text-xs font-semibold uppercase tracking-widest" style={{ color: '#232a2e' }}>
-              Backlog
-            </div>
-            <div className="text-xs mt-0.5" style={{ color: '#8a9499' }}>
-              {backlogTasks.length} unscheduled
-            </div>
-          </div>
-
-          <div className="flex-1 overflow-y-auto pt-1">
-            {backlogTasks.length === 0 ? (
-              <p className="text-xs text-center py-8" style={{ color: '#cbd3d6' }}>
-                Nothing here yet
-              </p>
-            ) : (
-              backlogTasks.map(task => (
-                <TaskRow
-                  key={task.id}
-                  task={task}
-                  displayId={displayIds.get(task.id) ?? '—'}
-                  onToggleDone={onToggleDone}
-                  onEdit={onEdit}
-                  onDelete={onDelete}
-                />
-              ))
-            )}
-          </div>
-
-          <div className="px-4 py-2 shrink-0" style={{ borderTop: '1px solid #f0f2f3' }}>
-            <button
-              onClick={() => setAddingBacklog(true)}
-              className="flex items-center gap-1 text-xs transition-colors"
-              style={{ color: '#cbd3d6' }}
-              onMouseEnter={e => (e.currentTarget.style.color = '#8a9499')}
-              onMouseLeave={e => (e.currentTarget.style.color = '#cbd3d6')}
-            >
-              <Plus size={12} /> Add to backlog
-            </button>
-          </div>
-        </div>
-
-        {/* 3 day columns */}
-        <div className="flex-1 overflow-auto">
-          <div className="grid h-full" style={{ gridTemplateColumns: 'repeat(3, 1fr)' }}>
-            {dayColumns}
-          </div>
-        </div>
-
-        <Modal open={!!addingDate} onClose={() => setAddingDate(null)} title="New Task">
-          <TaskForm
-            initial={{ assigned_date: addingDate ?? undefined }}
-            onSubmit={async data => { await onAdd(data); setAddingDate(null) }}
-            onCancel={() => setAddingDate(null)}
-          />
-        </Modal>
-
-        <Modal open={addingBacklog} onClose={() => setAddingBacklog(false)} title="New Backlog Task">
-          <TaskForm
-            initial={{}}
-            onSubmit={async data => { await onAdd(data); setAddingBacklog(false) }}
-            onCancel={() => setAddingBacklog(false)}
-          />
-        </Modal>
-      </div>
-    )
-  }
-
-  // ── 1 / 7 col layout ─────────────────────────────────────────────────────
   return (
     <div className="flex-1 overflow-auto" style={{ height: 'calc(100vh - 52px)' }}>
       <div

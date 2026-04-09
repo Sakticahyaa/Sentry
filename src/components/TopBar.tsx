@@ -135,7 +135,7 @@ export function TopBar({
 
       {/* Legacy — hidden on mobile */}
       <button onClick={onLegacy} className="hidden sm:block btn-ghost text-xs px-2 py-1">
-        Legacy
+        Control
       </button>
 
       <button onClick={onToggleTheme} className="btn-ghost px-2 py-1" title="Toggle theme">

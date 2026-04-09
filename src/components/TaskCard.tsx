@@ -91,7 +91,7 @@ export function TaskCard({ task, onEdit, onDelete, onCycle, isDraggable = true }
 
           <div className="flex-1 min-w-0">
             <p
-              className={`text-sm font-medium leading-snug ${task.status === 'Done' ? 'line-through' : ''}`}
+              className={`text-sm font-medium leading-snug line-clamp-2 ${task.status === 'Done' ? 'line-through' : ''}`}
               style={{ color: task.status === 'Done' ? 'var(--t-text3)' : 'var(--t-text)' }}
             >
               {task.title}

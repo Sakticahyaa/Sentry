@@ -1,4 +1,4 @@
-import { LayoutDashboard, Calendar, Kanban, Tag, LogOut, TrendingUp, Columns, Settings } from 'lucide-react'
+import { LayoutDashboard, Kanban, Tag, LogOut, Columns, Settings } from 'lucide-react'
 import type { Branch, ViewType } from '../types/task'
 import { useBranchList, useBranchColor } from '../hooks/useBranches'
 
@@ -14,11 +14,9 @@ interface SidebarProps {
 }
 
 const LEGACY_VIEWS: { id: ViewType; label: string; icon: React.ReactNode }[] = [
-  { id: 'daily',     label: 'Daily',     icon: <LayoutDashboard size={15} /> },
-  { id: 'weekly',    label: 'Weekly',    icon: <Calendar size={15} /> },
-  { id: 'board',     label: 'Board',     icon: <Kanban size={15} /> },
-  { id: 'branch',    label: 'Branch',    icon: <Tag size={15} /> },
-  { id: 'analytics', label: 'Analytics', icon: <TrendingUp size={15} /> },
+  { id: 'daily',  label: 'Daily',  icon: <LayoutDashboard size={15} /> },
+  { id: 'board',  label: 'Board',  icon: <Kanban size={15} /> },
+  { id: 'branch', label: 'Branch', icon: <Tag size={15} /> },
 ]
 
 function BranchDot({ name }: { name: string | null }) {
@@ -48,7 +46,7 @@ export function Sidebar({ view, onViewChange, activeBranch, onBranchChange, onAd
           className="w-full flex items-center gap-2 px-2 py-2 rounded-lg text-sm transition-all"
           style={{ color: 'var(--t-accent)', backgroundColor: 'var(--t-accent-sub)', fontWeight: 500 }}
         >
-          <Columns size={15} /> Teux View
+          <Columns size={15} /> Hall
         </button>
       </div>
 
