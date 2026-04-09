@@ -26,9 +26,9 @@ export function TopBar({
   const next = () => setStartDate(addDays(startDate, step))
 
   const dateLabel = () => {
-    if (colCount === 1) return format(startDate, 'MMMM d, yyyy')
+    if (colCount === 1) return format(startDate, 'EEEE, MMMM d, yyyy')
     const end = addDays(startDate, colCount - 1)
-    return `${format(startDate, 'MMM d')} – ${format(end, 'MMM d, yyyy')}`
+    return `${format(startDate, 'MMMM d')} – ${format(end, 'MMMM d, yyyy')}`
   }
 
   return (

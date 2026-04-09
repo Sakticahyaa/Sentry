@@ -58,10 +58,10 @@ function DayColumn({ date, tasks, onToggleDone, onEdit, onDelete, onAdd, isLast 
         style={{ borderBottom: '1px solid #cbd3d6' }}
       >
         <div
-          className="text-xs font-semibold uppercase tracking-widest"
+          className="text-xs font-semibold uppercase tracking-widest truncate"
           style={{ color: today ? '#232a2e' : '#cbd3d6' }}
         >
-          {format(date, 'EEE')}
+          {format(date, 'EEEE')}
         </div>
         <div
           className="text-2xl font-bold leading-tight"
@@ -69,8 +69,8 @@ function DayColumn({ date, tasks, onToggleDone, onEdit, onDelete, onAdd, isLast 
         >
           {format(date, 'd')}
         </div>
-        <div className="text-xs" style={{ color: '#cbd3d6' }}>
-          {format(date, 'MMM yyyy')}
+        <div className="text-xs truncate" style={{ color: '#cbd3d6' }}>
+          {format(date, 'MMMM yyyy')}
         </div>
       </div>
 
