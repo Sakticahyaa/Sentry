@@ -1,4 +1,4 @@
-import { LayoutDashboard, Calendar, Kanban, Tag, Plus, LogOut, TrendingUp, Columns, Settings } from 'lucide-react'
+import { LayoutDashboard, Calendar, Kanban, Tag, LogOut, TrendingUp, Columns, Settings } from 'lucide-react'
 import type { Branch, ViewType } from '../types/task'
 import { useBranchList, useBranchColor } from '../hooks/useBranches'
 
@@ -9,11 +9,11 @@ interface SidebarProps {
   onBranchChange: (b: Branch | null) => void
   onAddTask: () => void
   onManageBranches: () => void
+  onSwitchToTeux: () => void
   onSignOut: () => void
 }
 
-const VIEWS: { id: ViewType; label: string; icon: React.ReactNode }[] = [
-  { id: 'teux',      label: 'Teux',      icon: <Columns size={15} /> },
+const LEGACY_VIEWS: { id: ViewType; label: string; icon: React.ReactNode }[] = [
   { id: 'daily',     label: 'Daily',     icon: <LayoutDashboard size={15} /> },
   { id: 'weekly',    label: 'Weekly',    icon: <Calendar size={15} /> },
   { id: 'board',     label: 'Board',     icon: <Kanban size={15} /> },
@@ -26,7 +26,7 @@ function BranchDot({ name }: { name: string | null }) {
   return <span style={{ width: 3, height: 14, borderRadius: 2, backgroundColor: color, flexShrink: 0, display: 'inline-block' }} />
 }
 
-export function Sidebar({ view, onViewChange, activeBranch, onBranchChange, onAddTask, onManageBranches, onSignOut }: SidebarProps) {
+export function Sidebar({ view, onViewChange, activeBranch, onBranchChange, onAddTask, onManageBranches, onSwitchToTeux, onSignOut }: SidebarProps) {
   const branches = useBranchList()
 
   return (
@@ -34,31 +34,41 @@ export function Sidebar({ view, onViewChange, activeBranch, onBranchChange, onAd
       className="w-56 shrink-0 flex flex-col h-screen sticky top-0 border-r"
       style={{ backgroundColor: 'var(--t-elevated)', borderColor: 'var(--t-border)' }}
     >
-      {/* Brand */}
-      <div className="p-4 border-b" style={{ borderColor: 'var(--t-border)' }}>
-        <div className="flex items-center gap-2">
-          <div
-            className="w-7 h-7 rounded-lg flex items-center justify-center text-white text-xs font-bold"
-            style={{ backgroundColor: '#C9A84C' }}
-          >
-            S
-          </div>
-          <span className="font-semibold text-sm" style={{ color: 'var(--t-text)' }}>Sentry</span>
-        </div>
-        <p className="text-xs mt-0.5" style={{ color: 'var(--t-text4)' }}>Task Manager</p>
+      {/* Brand — same style as TopBar */}
+      <div className="relative flex items-center justify-center px-4 shrink-0" style={{ height: 52, borderBottom: '1px solid var(--t-border)', background: 'var(--t-card)' }}>
+        <span className="text-xs font-bold tracking-[0.2em] uppercase" style={{ color: 'var(--t-text)' }}>
+          Sentry
+        </span>
+      </div>
+
+      {/* Teux shortcut — above the separator */}
+      <div className="px-3 pt-3 pb-2">
+        <button
+          onClick={onSwitchToTeux}
+          className="w-full flex items-center gap-2 px-2 py-2 rounded-lg text-sm transition-all"
+          style={{ color: 'var(--t-accent)', backgroundColor: 'var(--t-accent-sub)', fontWeight: 500 }}
+        >
+          <Columns size={15} /> Teux View
+        </button>
+      </div>
+
+      {/* Separator */}
+      <div className="mx-3 mb-1 flex items-center gap-2">
+        <div className="flex-1 h-px" style={{ background: 'var(--t-border)' }} />
+        <span className="text-xs uppercase tracking-widest" style={{ color: 'var(--t-text4)', fontSize: 9 }}>Legacy</span>
+        <div className="flex-1 h-px" style={{ background: 'var(--t-border)' }} />
       </div>
 
       {/* Add task */}
-      <div className="p-3 border-b" style={{ borderColor: 'var(--t-border)' }}>
+      <div className="px-3 pb-2">
         <button onClick={onAddTask} className="btn-dark w-full justify-center text-sm">
-          <Plus size={14} /> New Task
+          New Task
         </button>
       </div>
 
       {/* Views */}
-      <nav className="p-3 space-y-0.5">
-        <p className="text-xs font-semibold px-2 mb-2 uppercase tracking-wider" style={{ color: 'var(--t-text4)' }}>Views</p>
-        {VIEWS.map(v => {
+      <nav className="px-3 space-y-0.5">
+        {LEGACY_VIEWS.map(v => {
           const active = view === v.id
           return (
             <button
@@ -66,8 +76,8 @@ export function Sidebar({ view, onViewChange, activeBranch, onBranchChange, onAd
               onClick={() => onViewChange(v.id)}
               className="w-full flex items-center gap-2 px-2 py-2 rounded-lg text-sm transition-all"
               style={{
-                backgroundColor: active ? 'var(--t-accent-sub)' : 'transparent',
-                color: active ? 'var(--t-accent)' : 'var(--t-text2)',
+                backgroundColor: active ? 'var(--t-hover)' : 'transparent',
+                color: active ? 'var(--t-text)' : 'var(--t-text2)',
                 fontWeight: active ? 500 : 400,
               }}
               onMouseEnter={e => { if (!active) (e.currentTarget as HTMLButtonElement).style.backgroundColor = 'var(--t-hover)' }}
@@ -80,7 +90,7 @@ export function Sidebar({ view, onViewChange, activeBranch, onBranchChange, onAd
       </nav>
 
       {/* Branches */}
-      <div className="p-3 border-t flex-1 overflow-y-auto" style={{ borderColor: 'var(--t-border)' }}>
+      <div className="px-3 pt-3 border-t flex-1 overflow-y-auto mt-2" style={{ borderColor: 'var(--t-border)' }}>
         <div className="flex items-center justify-between px-2 mb-2">
           <p className="text-xs font-semibold uppercase tracking-wider" style={{ color: 'var(--t-text4)' }}>Branches</p>
           <button onClick={onManageBranches} title="Manage branches" style={{ color: 'var(--t-text4)' }} className="btn-ghost p-0.5">
@@ -92,7 +102,10 @@ export function Sidebar({ view, onViewChange, activeBranch, onBranchChange, onAd
           return (
             <button
               key={b ?? 'all'}
-              onClick={() => onBranchChange(b)}
+              onClick={() => {
+                onBranchChange(b)
+                if (b !== null) onViewChange('branch')
+              }}
               className="w-full flex items-center gap-2 px-2 py-1.5 rounded-lg text-sm transition-all mb-0.5"
               style={{
                 backgroundColor: active ? 'var(--t-hover)' : 'transparent',

@@ -50,7 +50,7 @@ export default function App() {
   const [layout, setLayout]                 = useState<Layout>('teux')
 
   // Legacy view state
-  const [legacyView, setLegacyView]         = useState<ViewType>('teux')
+  const [legacyView, setLegacyView]         = useState<ViewType>('daily')
   const [activeBranch, setActiveBranch]     = useState<Branch | null>(null)
   const [search, setSearch]                 = useState('')
   const [showLegacyAdd, setShowLegacyAdd]   = useState(false)
@@ -128,24 +128,30 @@ export default function App() {
             onBranchChange={setActiveBranch}
             onAddTask={() => setShowLegacyAdd(true)}
             onManageBranches={() => setShowBranchMgr(true)}
+            onSwitchToTeux={() => setLayout('teux')}
             onSignOut={signOut}
           />
           <div className="flex flex-col flex-1 overflow-hidden">
-            <div className="flex items-center gap-2 px-4 shrink-0" style={{ borderBottom: '1px solid var(--t-border)', background: 'var(--t-card)' }}>
-              <button
-                onClick={() => setLayout('teux')}
-                className="text-xs px-2 py-1 rounded transition-all shrink-0"
-                style={{ color: 'var(--t-text3)', border: '1px solid var(--t-border)' }}
-              >
-                ← Teux
+            {/* Legacy top bar — same SENTRY brand as Teux */}
+            <div className="relative flex items-center gap-2 px-4 shrink-0" style={{ height: 52, borderBottom: '1px solid var(--t-border)', background: 'var(--t-card)' }}>
+              <span className="absolute left-1/2 -translate-x-1/2 text-xs font-bold tracking-[0.2em] uppercase pointer-events-none" style={{ color: 'var(--t-text)' }}>
+                Sentry
+              </span>
+              <div className="flex-1" />
+              <div className="relative w-48">
+                <input
+                  className="input pl-3 pr-3 py-1 text-xs w-full"
+                  placeholder="Search..."
+                  value={search}
+                  onChange={e => setSearch(e.target.value)}
+                />
+              </div>
+              <button onClick={toggleTheme} className="btn-ghost p-2">
+                {theme === 'dark'
+                  ? <span style={{ color: '#C9A84C', fontSize: 14 }}>☀</span>
+                  : <span style={{ color: 'var(--t-accent)', fontSize: 14 }}>☾</span>
+                }
               </button>
-              <Header
-                search={search}
-                onSearchChange={setSearch}
-                title={viewTitles[legacyView]}
-                theme={theme}
-                onToggleTheme={toggleTheme}
-              />
             </div>
             <div className="flex-1 overflow-hidden flex flex-col min-h-0">
               {loading ? (
