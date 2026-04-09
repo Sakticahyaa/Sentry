@@ -51,9 +51,16 @@ export function TopBar({
 
   return (
     <div
-      className="flex items-center gap-2 px-5 shrink-0"
+      className="relative flex items-center gap-2 px-5 shrink-0"
       style={{ height: 52, borderBottom: '1px solid #cbd3d6', background: '#ffffff' }}
     >
+      {/* Brand */}
+      <span
+        className="absolute left-1/2 -translate-x-1/2 text-xs font-bold tracking-[0.2em] uppercase pointer-events-none"
+        style={{ color: '#232a2e' }}
+      >
+        Sentry
+      </span>
       {/* Nav arrows */}
       {view === 'columns' && (
         <div className="flex items-center gap-0.5">
