@@ -103,7 +103,7 @@ export function TaskRow({ task, displayId, onToggleDone, onEdit, onDelete }: Tas
           <span style={{
             fontFamily: "'Space Grotesk', sans-serif",
             fontSize: 11,
-            color: '#cbd3d6',
+            color: '#8a9499',
             overflow: 'hidden',
             textOverflow: 'ellipsis',
             whiteSpace: 'nowrap',
