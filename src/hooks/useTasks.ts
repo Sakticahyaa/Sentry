@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import type { Task, TaskInsert, TaskUpdate, Filters } from '../types/task'
-import { fetchTasks, createTask, updateTask, deleteTask, bulkUpdateTasks } from '../lib/supabase'
+import { fetchTasks, createTask, updateTask, deleteTask, bulkUpdateTasks, reorderTasks } from '../lib/supabase'
 
 const defaultFilters: Filters = {
   branch: null,
@@ -67,6 +67,14 @@ export function useTasks(initialFilters?: Partial<Filters>, enabled = true) {
     await editTask(task.id, { status: next[task.status] })
   }
 
+  const reorder = async (updates: { id: string; order: number }[]) => {
+    setTasks(prev => {
+      const map = new Map(updates.map(u => [u.id, u.order]))
+      return prev.map(t => map.has(t.id) ? { ...t, order: map.get(t.id)! } : t)
+    })
+    await reorderTasks(updates)
+  }
+
   const updateFilter = (key: keyof Filters, value: Filters[keyof Filters]) => {
     setFilters(prev => ({ ...prev, [key]: value }))
   }
@@ -84,6 +92,7 @@ export function useTasks(initialFilters?: Partial<Filters>, enabled = true) {
     removeTask,
     bulkUpdate,
     cycleStatus,
+    reorder,
     updateFilter,
     clearFilters,
     setTasks,

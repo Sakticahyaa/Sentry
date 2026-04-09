@@ -39,7 +39,7 @@ export default function App() {
 
   const { theme, toggle: toggleTheme } = useTheme()
   const rolledOver = useRef(false)
-  const { tasks, loading, addTask, editTask, removeTask, cycleStatus, setTasks } = useTasks(undefined, !!user)
+  const { tasks, loading, addTask, editTask, removeTask, cycleStatus, reorder, setTasks } = useTasks(undefined, !!user)
   const { branches, getColor, addBranch, removeBranch, editBranch } = useBranches(!!user)
 
   // Auto-roll overdue incomplete tasks to today on first load
@@ -196,6 +196,7 @@ export default function App() {
             onEdit={editTask}
             onDelete={removeTask}
             onAdd={addTask}
+            onReorder={reorder}
           />
         ) : (
           <CalendarView tasks={tasks} onDayClick={handleCalendarDayClick} />

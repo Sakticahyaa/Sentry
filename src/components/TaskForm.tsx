@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import type { Task, TaskInsert, Branch, Status, TimeBlock, Priority } from '../types/task'
-import { BRANCHES } from '../constants/branches'
-import { TIME_BLOCKS, PRIORITY_CONFIG } from '../constants/timeblocks'
+import { useBranchList } from '../hooks/useBranches'
+import { TIME_BLOCKS } from '../constants/timeblocks'
 
 interface TaskFormProps {
   initial?: Partial<Task>
@@ -11,6 +11,7 @@ interface TaskFormProps {
 }
 
 export function TaskForm({ initial, onSubmit, onCancel, submitLabel = 'Save' }: TaskFormProps) {
+  const branches = useBranchList()
   const [form, setForm] = useState<Partial<TaskInsert>>({
     title:          initial?.title          ?? '',
     branch:         initial?.branch         ?? null,
@@ -54,14 +55,14 @@ export function TaskForm({ initial, onSubmit, onCancel, submitLabel = 'Save' }: 
           <label className="label">Branch</label>
           <select className="input" value={form.branch ?? ''} onChange={e => set('branch', (e.target.value as Branch) || null)}>
             <option value="">— None —</option>
-            {BRANCHES.map(b => <option key={b} value={b}>{b}</option>)}
+            {branches.map(b => <option key={b.id} value={b.name}>{b.name}</option>)}
           </select>
         </div>
         <div>
           <label className="label">Priority</label>
           <select className="input" value={form.priority ?? 3} onChange={e => set('priority', Number(e.target.value) as Priority)}>
-            {PRIORITY_CONFIG.map(p => (
-              <option key={p.value} value={p.value}>{p.icon} {p.label}</option>
+            {([1, 2, 3, 4, 5] as Priority[]).map(n => (
+              <option key={n} value={n}>{n}</option>
             ))}
           </select>
         </div>

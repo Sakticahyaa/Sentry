@@ -1,6 +1,13 @@
 import { useState } from 'react'
 import { format, addDays, isToday } from 'date-fns'
 import { Plus } from 'lucide-react'
+import {
+  DndContext, closestCenter, PointerSensor, useSensor, useSensors,
+  type DragEndEvent,
+} from '@dnd-kit/core'
+import {
+  SortableContext, verticalListSortingStrategy, arrayMove,
+} from '@dnd-kit/sortable'
 import type { Task } from '../types/task'
 import { TaskRow } from './TaskRow'
 import { Modal } from './ui/Modal'
@@ -15,6 +22,7 @@ interface TeuxViewProps {
   onEdit: (id: string, updates: Partial<Task>) => Promise<void>
   onDelete: (id: string) => Promise<void>
   onAdd: (data: Partial<Task>) => Promise<void>
+  onReorder: (updates: { id: string; order: number }[]) => Promise<void>
 }
 
 const BLOCK_ORDER: Record<string, number> = {
@@ -41,19 +49,27 @@ interface DayColumnProps {
   onEdit: (id: string, updates: Partial<Task>) => Promise<void>
   onDelete: (id: string) => Promise<void>
   onAdd: (date: string) => void
-  isLast: boolean
+  onReorder: (updates: { id: string; order: number }[]) => Promise<void>
 }
 
-function DayColumn({ date, tasks, displayIds, onToggleDone, onEdit, onDelete, onAdd, isLast }: DayColumnProps) {
+function DayColumn({ date, tasks, displayIds, onToggleDone, onEdit, onDelete, onAdd, onReorder }: DayColumnProps) {
   const key = format(date, 'yyyy-MM-dd')
   const dayTasks = sortTasks(tasks.filter(t => t.assigned_date === key))
   const today = isToday(date)
 
+  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 8 } }))
+
+  const handleDragEnd = async (event: DragEndEvent) => {
+    const { active, over } = event
+    if (!over || active.id === over.id) return
+    const oldIdx = dayTasks.findIndex(t => t.id === active.id)
+    const newIdx = dayTasks.findIndex(t => t.id === over.id)
+    const reordered = arrayMove(dayTasks, oldIdx, newIdx)
+    await onReorder(reordered.map((t, i) => ({ id: t.id, order: i })))
+  }
+
   return (
-    <div
-      className="flex flex-col min-h-full"
-      style={{ minWidth: 0 }}
-    >
+    <div className="flex flex-col min-h-full" style={{ minWidth: 0 }}>
       {/* Day header */}
       <div className="px-4 pt-4 pb-3 shrink-0">
         <div
@@ -75,18 +91,21 @@ function DayColumn({ date, tasks, displayIds, onToggleDone, onEdit, onDelete, on
 
       {/* Tasks */}
       <div className="flex-1 px-3 pt-2">
-        {dayTasks.map(task => (
-          <TaskRow
-            key={task.id}
-            task={task}
-            displayId={displayIds.get(task.id) ?? '—'}
-            onToggleDone={onToggleDone}
-            onEdit={onEdit}
-            onDelete={onDelete}
-          />
-        ))}
+        <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+          <SortableContext items={dayTasks.map(t => t.id)} strategy={verticalListSortingStrategy}>
+            {dayTasks.map(task => (
+              <TaskRow
+                key={task.id}
+                task={task}
+                displayId={displayIds.get(task.id) ?? '—'}
+                onToggleDone={onToggleDone}
+                onEdit={onEdit}
+                onDelete={onDelete}
+              />
+            ))}
+          </SortableContext>
+        </DndContext>
 
-        {/* Add button */}
         <button
           onClick={() => onAdd(key)}
           className="flex items-center gap-1 w-full py-1.5 mt-1 text-xs transition-colors"
@@ -101,7 +120,7 @@ function DayColumn({ date, tasks, displayIds, onToggleDone, onEdit, onDelete, on
   )
 }
 
-export function TeuxView({ colCount, startDate, tasks, onToggleDone, onEdit, onDelete, onAdd }: TeuxViewProps) {
+export function TeuxView({ colCount, startDate, tasks, onToggleDone, onEdit, onDelete, onAdd, onReorder }: TeuxViewProps) {
   const [addingDate, setAddingDate] = useState<string | null>(null)
   const displayIds = buildDisplayIds(tasks)
 
@@ -113,7 +132,7 @@ export function TeuxView({ colCount, startDate, tasks, onToggleDone, onEdit, onD
         className="grid h-full"
         style={{ gridTemplateColumns: `repeat(${colCount}, 1fr)` }}
       >
-        {days.map((day, i) => (
+        {days.map(day => (
           <DayColumn
             key={format(day, 'yyyy-MM-dd')}
             date={day}
@@ -123,7 +142,7 @@ export function TeuxView({ colCount, startDate, tasks, onToggleDone, onEdit, onD
             onEdit={onEdit}
             onDelete={onDelete}
             onAdd={(date) => setAddingDate(date)}
-            isLast={i === days.length - 1}
+            onReorder={onReorder}
           />
         ))}
       </div>
