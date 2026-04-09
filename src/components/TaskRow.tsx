@@ -21,7 +21,6 @@ export function TaskRow({ task, onToggleDone, onEdit, onDelete }: TaskRowProps) 
 
   // Format: [6-char id] · [title] · [Xh] · [timeblock]
   const parts = [
-    task.id.slice(0, 6),
     task.title,
     task.estimated_time ? `${task.estimated_time}h` : null,
     task.time_block ?? null,
