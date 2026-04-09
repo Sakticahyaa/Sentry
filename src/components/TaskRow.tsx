@@ -51,20 +51,18 @@ export function TaskRow({ task, displayId, onToggleDone, onEdit, onDelete }: Tas
         {...attributes}
         {...listeners}
       >
-        {/* Slide-in action pills */}
+        {/* Done — slides in from left */}
         <div
           style={{
-            width: hovered ? 84 : 0,
+            width: hovered ? 48 : 0,
             overflow: 'hidden',
             flexShrink: 0,
             transition: 'width 0.15s ease',
             display: 'flex',
             alignItems: 'center',
-            gap: 4,
             paddingRight: hovered ? 6 : 0,
           }}
         >
-          {/* Done */}
           <button
             onPointerDown={e => e.stopPropagation()}
             onClick={e => { e.stopPropagation(); onToggleDone(task) }}
@@ -86,8 +84,54 @@ export function TaskRow({ task, displayId, onToggleDone, onEdit, onDelete }: Tas
           >
             {isDone ? 'Undo' : 'Done'}
           </button>
+        </div>
 
-          {/* Del */}
+        {/* Branch color strip */}
+        <div
+          style={{
+            width: 3, borderRadius: 3,
+            backgroundColor: barColor,
+            flexShrink: 0,
+            alignSelf: 'stretch',
+            margin: '5px 10px 5px 0',
+          }}
+        />
+
+        {/* Content — click to edit */}
+        <div
+          className="flex-1 flex flex-col justify-center py-1.5 min-w-0"
+          onPointerDown={e => e.stopPropagation()}
+          onClick={() => setEditing(true)}
+          style={{ cursor: 'pointer' }}
+        >
+          <span
+            className="text-sm leading-snug truncate"
+            style={{
+              fontFamily: "'DM Mono', monospace",
+              color: isDone ? '#8a9499' : '#232a2e',
+              textDecoration: isDone ? 'line-through' : 'none',
+              fontWeight: 400,
+            }}
+          >
+            {task.title}
+          </span>
+          <span className="text-xs truncate" style={{ color: '#cbd3d6', fontFamily: "'Space Grotesk', sans-serif" }}>
+            {displayId}{meta ? ` · ${meta}` : ''}
+          </span>
+        </div>
+
+        {/* Del — slides in from right */}
+        <div
+          style={{
+            width: hovered ? 44 : 0,
+            overflow: 'hidden',
+            flexShrink: 0,
+            transition: 'width 0.15s ease',
+            display: 'flex',
+            alignItems: 'center',
+            paddingLeft: hovered ? 6 : 0,
+          }}
+        >
           <button
             onPointerDown={e => e.stopPropagation()}
             onClick={e => { e.stopPropagation(); onDelete(task.id) }}
@@ -107,40 +151,6 @@ export function TaskRow({ task, displayId, onToggleDone, onEdit, onDelete }: Tas
           >
             Del
           </button>
-        </div>
-
-        {/* Branch color strip */}
-        <div
-          style={{
-            width: 3, borderRadius: 3,
-            backgroundColor: barColor,
-            flexShrink: 0,
-            alignSelf: 'stretch',
-            margin: '5px 10px 5px 0',
-          }}
-        />
-
-        {/* Content — click to edit */}
-        <div
-          className="flex-1 flex flex-col justify-center py-1.5 pr-2 min-w-0"
-          onPointerDown={e => e.stopPropagation()}
-          onClick={() => setEditing(true)}
-          style={{ cursor: 'pointer' }}
-        >
-          <span
-            className="text-sm leading-snug truncate"
-            style={{
-              fontFamily: "'DM Mono', monospace",
-              color: isDone ? '#8a9499' : '#232a2e',
-              textDecoration: isDone ? 'line-through' : 'none',
-              fontWeight: 400,
-            }}
-          >
-            {task.title}
-          </span>
-          <span className="text-xs truncate" style={{ color: '#cbd3d6', fontFamily: "'Space Grotesk', sans-serif" }}>
-            {displayId}{meta ? ` · ${meta}` : ''}
-          </span>
         </div>
       </div>
 
