@@ -3,6 +3,7 @@ import { startOfWeek } from 'date-fns'
 import { useAuth } from './hooks/useAuth'
 import { useTasks } from './hooks/useTasks'
 import { useBranches, BranchesContext } from './hooks/useBranches'
+import { useTheme } from './hooks/useTheme'
 import { Login } from './pages/Login'
 import { TopBar } from './components/TopBar'
 import { TeuxView } from './components/TeuxView'
@@ -36,6 +37,7 @@ export default function App() {
   const [activeBranch, setActiveBranch]     = useState<Branch | null>(null)
   const [search, setSearch]                 = useState('')
 
+  const { theme, toggle: toggleTheme } = useTheme()
   const { tasks, loading, addTask, editTask, removeTask, cycleStatus, setTasks } = useTasks(undefined, !!user)
   const { branches, getColor, addBranch, removeBranch, editBranch } = useBranches(!!user)
 
@@ -87,13 +89,22 @@ export default function App() {
             onSignOut={signOut}
           />
           <div className="flex flex-col flex-1 overflow-hidden">
-            <Header
-              search={search}
-              onSearchChange={setSearch}
-              title={viewTitles[legacyView]}
-              theme="light"
-              onToggleTheme={() => setLayout('teux')}
-            />
+            <div className="flex items-center gap-2 px-4 shrink-0" style={{ borderBottom: '1px solid var(--t-border)', background: 'var(--t-card)' }}>
+              <button
+                onClick={() => setLayout('teux')}
+                className="text-xs px-2 py-1 rounded transition-all shrink-0"
+                style={{ color: 'var(--t-text3)', border: '1px solid var(--t-border)' }}
+              >
+                ← Teux
+              </button>
+              <Header
+                search={search}
+                onSearchChange={setSearch}
+                title={viewTitles[legacyView]}
+                theme={theme}
+                onToggleTheme={toggleTheme}
+              />
+            </div>
             <div className="flex-1 overflow-auto">
               {loading ? (
                 <div className="flex items-center justify-center h-full">
@@ -156,6 +167,8 @@ export default function App() {
           onSignOut={signOut}
           backlogCount={backlogCount}
           onLegacy={() => setLayout('legacy')}
+          theme={theme}
+          onToggleTheme={toggleTheme}
         />
 
         {loading ? (

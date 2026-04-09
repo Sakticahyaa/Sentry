@@ -1,4 +1,4 @@
-import { ChevronLeft, ChevronRight, Calendar, LogOut, GitBranch } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Calendar, LogOut, GitBranch, Sun, Moon } from 'lucide-react'
 import { format, addDays } from 'date-fns'
 
 type ColCount = 1 | 3 | 7
@@ -16,6 +16,8 @@ interface TopBarProps {
   onSignOut: () => void
   backlogCount: number
   onLegacy: () => void
+  theme: 'light' | 'dark'
+  onToggleTheme: () => void
 }
 
 function NavBtn({ label, onClick }: { label: string; onClick: () => void }) {
@@ -35,6 +37,7 @@ function NavBtn({ label, onClick }: { label: string; onClick: () => void }) {
 export function TopBar({
   colCount, setColCount, view, setView,
   startDate, setStartDate, onBacklog, onBranches, onSignOut, backlogCount, onLegacy,
+  theme, onToggleTheme,
 }: TopBarProps) {
   const step = colCount === 7 ? 7 : colCount
   const prev = () => setStartDate(addDays(startDate, -step))
@@ -131,6 +134,10 @@ export function TopBar({
         title="Switch to legacy view"
       >
         Legacy
+      </button>
+
+      <button onClick={onToggleTheme} className="btn-ghost px-2 py-1" title="Toggle theme">
+        {theme === 'dark' ? <Sun size={14} /> : <Moon size={14} />}
       </button>
 
       <button onClick={onSignOut} className="btn-ghost px-2 py-1" title="Sign out">

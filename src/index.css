@@ -23,6 +23,32 @@
   --t-gold:       #C9A84C;
 }
 
+html.dark {
+  --border: #2d3a3f;
+  --dark:   #e8eced;
+  --muted:  #8a9499;
+  --hover:  #1e2629;
+  --white:  #111718;
+
+  --t-text:       #e8eced;
+  --t-text2:      #b0bbbf;
+  --t-text3:      #8a9499;
+  --t-text4:      #6a7a80;
+  --t-border:     #2d3a3f;
+  --t-card:       #1a2225;
+  --t-elevated:   #1e2629;
+  --t-hover:      #252e33;
+  --t-accent:     #7b8fa8;
+  --t-accent-sub: #1e2d3a;
+  --t-gold:       #C9A84C;
+}
+
+html.dark body,
+html.dark #root {
+  background: var(--white);
+  color: var(--dark);
+}
+
 @layer base {
   html, body, #root {
     height: 100%;
