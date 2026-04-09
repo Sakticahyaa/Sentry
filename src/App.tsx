@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
-import { startOfWeek, format } from 'date-fns'
+import { startOfWeek, addDays, format } from 'date-fns'
 import { useAuth } from './hooks/useAuth'
 import { useTasks } from './hooks/useTasks'
 import { useBranches, BranchesContext } from './hooks/useBranches'
@@ -28,6 +28,20 @@ export default function App() {
   const [colCount, setColCount]     = useState<ColCount>(7)
   const [view, setView]             = useState<ViewMode>('columns')
   const [startDate, setStartDate]   = useState<Date>(() => startOfWeek(new Date(), { weekStartsOn: 1 }))
+
+  const handleSetColCount = (n: ColCount) => {
+    setColCount(n)
+    const today = new Date()
+    if (n === 7) setStartDate(startOfWeek(today, { weekStartsOn: 1 }))
+    else if (n === 3) setStartDate(addDays(today, -1))
+  }
+
+  const handleToday = () => {
+    const today = new Date()
+    if (colCount === 7) setStartDate(startOfWeek(today, { weekStartsOn: 1 }))
+    else if (colCount === 3) setStartDate(addDays(today, -1))
+    else setStartDate(today)
+  }
   const [showBacklog, setShowBacklog]       = useState(false)
   const [showBranchMgr, setShowBranchMgr]   = useState(false)
   const [layout, setLayout]                 = useState<Layout>('teux')
@@ -169,7 +183,8 @@ export default function App() {
       <div className="flex flex-col" style={{ height: '100vh', overflow: 'hidden' }}>
         <TopBar
           colCount={colCount}
-          setColCount={setColCount}
+          setColCount={handleSetColCount}
+          onToday={handleToday}
           view={view}
           setView={setView}
           startDate={startDate}

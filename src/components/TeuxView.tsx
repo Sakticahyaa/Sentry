@@ -74,13 +74,13 @@ function DayColumn({ date, tasks, displayIds, onToggleDone, onEdit, onDelete, on
       <div className="px-4 pt-4 pb-3 shrink-0">
         <div
           className="text-xs font-semibold uppercase tracking-widest truncate"
-          style={{ color: today ? '#000000' : '#232a2e' }}
+          style={{ color: today ? '#C9A84C' : '#232a2e' }}
         >
           {format(date, 'EEEE')}
         </div>
         <div
           className="text-2xl font-bold leading-tight"
-          style={{ color: today ? '#000000' : '#232a2e' }}
+          style={{ color: today ? '#C9A84C' : '#232a2e' }}
         >
           {format(date, 'd')}
         </div>

@@ -18,6 +18,7 @@ interface TopBarProps {
   onLegacy: () => void
   theme: 'light' | 'dark'
   onToggleTheme: () => void
+  onToday: () => void
 }
 
 function NavBtn({ label, onClick }: { label: string; onClick: () => void }) {
@@ -37,9 +38,9 @@ function NavBtn({ label, onClick }: { label: string; onClick: () => void }) {
 export function TopBar({
   colCount, setColCount, view, setView,
   startDate, setStartDate, onBacklog, onBranches, onSignOut, backlogCount, onLegacy,
-  theme, onToggleTheme,
+  theme, onToggleTheme, onToday,
 }: TopBarProps) {
-  const step = colCount === 7 ? 7 : colCount
+  const step = colCount === 7 ? 7 : 1
   const prev = () => setStartDate(addDays(startDate, -step))
   const next = () => setStartDate(addDays(startDate, step))
 
@@ -98,7 +99,7 @@ export function TopBar({
 
       {/* Today */}
       {view === 'columns' && (
-        <button onClick={() => setStartDate(new Date())} className="btn-ghost text-xs px-2 py-1">
+        <button onClick={onToday} className="btn-ghost text-xs px-2 py-1">
           Today
         </button>
       )}
