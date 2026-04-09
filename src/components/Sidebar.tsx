@@ -1,6 +1,6 @@
-import { LayoutDashboard, Calendar, Kanban, Tag, Plus, LogOut, TrendingUp, Columns } from 'lucide-react'
+import { LayoutDashboard, Calendar, Kanban, Tag, Plus, LogOut, TrendingUp, Columns, Settings } from 'lucide-react'
 import type { Branch, ViewType } from '../types/task'
-import { BRANCHES, BRANCH_COLORS } from '../constants/branches'
+import { useBranchList, useBranchColor } from '../hooks/useBranches'
 
 interface SidebarProps {
   view: ViewType
@@ -8,6 +8,7 @@ interface SidebarProps {
   activeBranch: Branch | null
   onBranchChange: (b: Branch | null) => void
   onAddTask: () => void
+  onManageBranches: () => void
   onSignOut: () => void
 }
 
@@ -20,7 +21,14 @@ const VIEWS: { id: ViewType; label: string; icon: React.ReactNode }[] = [
   { id: 'analytics', label: 'Analytics', icon: <TrendingUp size={15} /> },
 ]
 
-export function Sidebar({ view, onViewChange, activeBranch, onBranchChange, onAddTask, onSignOut }: SidebarProps) {
+function BranchDot({ name }: { name: string | null }) {
+  const color = useBranchColor(name)
+  return <span style={{ width: 3, height: 14, borderRadius: 2, backgroundColor: color, flexShrink: 0, display: 'inline-block' }} />
+}
+
+export function Sidebar({ view, onViewChange, activeBranch, onBranchChange, onAddTask, onManageBranches, onSignOut }: SidebarProps) {
+  const branches = useBranchList()
+
   return (
     <aside
       className="w-56 shrink-0 flex flex-col h-screen sticky top-0 border-r"
@@ -31,7 +39,7 @@ export function Sidebar({ view, onViewChange, activeBranch, onBranchChange, onAd
         <div className="flex items-center gap-2">
           <div
             className="w-7 h-7 rounded-lg flex items-center justify-center text-white text-xs font-bold"
-            style={{ backgroundColor: 'var(--t-accent)' }}
+            style={{ backgroundColor: '#C9A84C' }}
           >
             S
           </div>
@@ -42,7 +50,7 @@ export function Sidebar({ view, onViewChange, activeBranch, onBranchChange, onAd
 
       {/* Add task */}
       <div className="p-3 border-b" style={{ borderColor: 'var(--t-border)' }}>
-        <button onClick={onAddTask} className="btn-primary w-full justify-center">
+        <button onClick={onAddTask} className="btn-dark w-full justify-center text-sm">
           <Plus size={14} /> New Task
         </button>
       </div>
@@ -73,8 +81,13 @@ export function Sidebar({ view, onViewChange, activeBranch, onBranchChange, onAd
 
       {/* Branches */}
       <div className="p-3 border-t flex-1 overflow-y-auto" style={{ borderColor: 'var(--t-border)' }}>
-        <p className="text-xs font-semibold px-2 mb-2 uppercase tracking-wider" style={{ color: 'var(--t-text4)' }}>Branches</p>
-        {[null, ...BRANCHES].map(b => {
+        <div className="flex items-center justify-between px-2 mb-2">
+          <p className="text-xs font-semibold uppercase tracking-wider" style={{ color: 'var(--t-text4)' }}>Branches</p>
+          <button onClick={onManageBranches} title="Manage branches" style={{ color: 'var(--t-text4)' }} className="btn-ghost p-0.5">
+            <Settings size={12} />
+          </button>
+        </div>
+        {[null, ...branches.map(b => b.name)].map(b => {
           const active = activeBranch === b
           return (
             <button
@@ -88,10 +101,7 @@ export function Sidebar({ view, onViewChange, activeBranch, onBranchChange, onAd
               onMouseEnter={e => { if (!active) (e.currentTarget as HTMLButtonElement).style.backgroundColor = 'var(--t-hover)' }}
               onMouseLeave={e => { if (!active) (e.currentTarget as HTMLButtonElement).style.backgroundColor = 'transparent' }}
             >
-              <span
-                className="w-2 h-2 rounded-full shrink-0"
-                style={{ backgroundColor: b ? BRANCH_COLORS[b] : 'var(--t-text4)' }}
-              />
+              <BranchDot name={b} />
               {b ?? 'All'}
             </button>
           )

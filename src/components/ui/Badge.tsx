@@ -1,11 +1,13 @@
 import type { Branch, Priority } from '../../types/task'
-import { BRANCH_BG } from '../../constants/branches'
 import { PRIORITY_CONFIG } from '../../constants/timeblocks'
+import { useBranchColor } from '../../hooks/useBranches'
 
 export function BranchBadge({ branch }: { branch: Branch | null }) {
-  if (!branch) return <span className="text-xs" style={{ color: 'var(--t-text4)' }}>—</span>
+  const color = useBranchColor(branch ?? null)
+  if (!branch) return null
   return (
-    <span className={`inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium border ${BRANCH_BG[branch]}`}>
+    <span className="inline-flex items-center gap-1.5 text-xs" style={{ color: 'var(--t-text2)' }}>
+      <span style={{ width: 3, height: 13, borderRadius: 2, backgroundColor: color, flexShrink: 0, display: 'inline-block' }} />
       {branch}
     </span>
   )

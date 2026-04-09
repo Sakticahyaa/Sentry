@@ -18,6 +18,8 @@ import { WeeklyView } from './components/views/WeeklyView'
 import { BoardView } from './components/views/BoardView'
 import { BranchView } from './components/views/BranchView'
 import { AnalyticsView } from './components/views/AnalyticsView'
+import { Modal } from './components/ui/Modal'
+import { TaskForm } from './components/TaskForm'
 import type { Branch, ViewType } from './types/task'
 
 type ColCount = 1 | 3 | 7
@@ -48,9 +50,10 @@ export default function App() {
   const [layout, setLayout]                 = useState<Layout>('teux')
 
   // Legacy view state
-  const [legacyView, setLegacyView]         = useState<ViewType>('daily')
+  const [legacyView, setLegacyView]         = useState<ViewType>('teux')
   const [activeBranch, setActiveBranch]     = useState<Branch | null>(null)
   const [search, setSearch]                 = useState('')
+  const [showLegacyAdd, setShowLegacyAdd]   = useState(false)
 
   const { theme, toggle: toggleTheme } = useTheme()
   const rolledOver = useRef(false)
@@ -123,7 +126,8 @@ export default function App() {
             onViewChange={setLegacyView}
             activeBranch={activeBranch}
             onBranchChange={setActiveBranch}
-            onAddTask={() => {}}
+            onAddTask={() => setShowLegacyAdd(true)}
+            onManageBranches={() => setShowBranchMgr(true)}
             onSignOut={signOut}
           />
           <div className="flex flex-col flex-1 overflow-hidden">
@@ -214,6 +218,26 @@ export default function App() {
             </div>
           </div>
         </div>
+
+        {showBranchMgr && (
+          <BranchManager
+            branches={branches}
+            onAdd={addBranch}
+            onDelete={removeBranch}
+            onEdit={editBranch}
+            onClose={() => setShowBranchMgr(false)}
+          />
+        )}
+
+        {showLegacyAdd && (
+          <Modal open onClose={() => setShowLegacyAdd(false)} title="New Task">
+            <TaskForm
+              initial={{ branch: activeBranch ?? undefined }}
+              onSubmit={async data => { await addTask(data); setShowLegacyAdd(false) }}
+              onCancel={() => setShowLegacyAdd(false)}
+            />
+          </Modal>
+        )}
       </BranchesContext.Provider>
     )
   }

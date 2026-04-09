@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { format } from 'date-fns'
 import type { Task, Status, Branch } from '../../types/task'
 import { TaskCard } from '../TaskCard'
 import { Plus } from 'lucide-react'
@@ -14,10 +15,10 @@ interface BoardViewProps {
   onAdd: (data: Partial<Task>) => Promise<void>
 }
 
-const STATUS_COLUMNS: { status: Status; label: string; accent: string }[] = [
-  { status: 'Not Yet', label: 'Not Yet', accent: 'var(--t-text4)' },
-  { status: 'Ongoing', label: 'Ongoing', accent: 'var(--t-accent)' },
-  { status: 'Done',    label: 'Done',    accent: '#22c55e' },
+const STATUS_COLUMNS: { key: string; label: string; accent: string }[] = [
+  { key: 'notyet', label: 'Not Yet', accent: 'var(--t-text4)' },
+  { key: 'today',  label: 'Today',   accent: '#C9A84C' },
+  { key: 'done',   label: 'Done',    accent: '#22c55e' },
 ]
 
 export function BoardView({ tasks, onEdit, onDelete, onCycle, onAdd }: BoardViewProps) {
@@ -31,7 +32,15 @@ export function BoardView({ tasks, onEdit, onDelete, onCycle, onAdd }: BoardView
     [tasks, branchFilter]
   )
 
+  const today = format(new Date(), 'yyyy-MM-dd')
   const backlogTasks = filtered.filter(t => !t.assigned_date).sort((a, b) => a.order - b.order)
+
+  const getColTasks = (key: string) => {
+    if (key === 'notyet') return filtered.filter(t => t.assigned_date && t.assigned_date !== today && t.status === 'Not Yet').sort((a, b) => a.order - b.order)
+    if (key === 'today')  return filtered.filter(t => t.assigned_date === today && t.status !== 'Done').sort((a, b) => a.order - b.order)
+    if (key === 'done')   return filtered.filter(t => t.status === 'Done').sort((a, b) => a.order - b.order)
+    return []
+  }
 
   const handleDrop = async (e: React.DragEvent, status: Status) => {
     e.preventDefault()
@@ -96,15 +105,15 @@ export function BoardView({ tasks, onEdit, onDelete, onCycle, onAdd }: BoardView
 
         {/* Status columns */}
         {STATUS_COLUMNS.map(col => {
-          const colTasks = filtered.filter(t => t.status === col.status && t.assigned_date).sort((a, b) => a.order - b.order)
+          const colTasks = getColTasks(col.key)
 
           return (
             <div
-              key={col.status}
+              key={col.key}
               className="flex flex-col rounded-xl border border-t-2 overflow-hidden"
               style={{ backgroundColor: 'var(--t-card)', borderColor: 'var(--t-border)', borderTopColor: col.accent }}
               onDragOver={e => e.preventDefault()}
-              onDrop={e => handleDrop(e, col.status)}
+              onDrop={e => handleDrop(e, col.key === 'done' ? 'Done' : col.key === 'today' ? 'Ongoing' : 'Not Yet')}
             >
               <div className="flex items-center justify-between px-3 py-2 shrink-0">
                 <span className="text-sm font-semibold" style={{ color: 'var(--t-text)' }}>{col.label}</span>
@@ -121,7 +130,7 @@ export function BoardView({ tasks, onEdit, onDelete, onCycle, onAdd }: BoardView
               </div>
               <div className="px-3 pb-2 shrink-0">
                 <button
-                  onClick={() => setAddingStatus(col.status)}
+                  onClick={() => setAddingStatus(col.key === 'done' ? 'Done' : col.key === 'today' ? 'Ongoing' : 'Not Yet')}
                   className="flex items-center gap-1 text-xs py-1 transition-colors"
                   style={{ color: 'var(--t-text4)' }}
                   onMouseEnter={e => (e.currentTarget as HTMLButtonElement).style.color = 'var(--t-text2)'}
