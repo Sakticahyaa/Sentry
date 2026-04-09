@@ -143,7 +143,7 @@ export default function App() {
                 onToggleTheme={toggleTheme}
               />
             </div>
-            <div className="flex-1 overflow-hidden flex flex-col">
+            <div className="flex-1 overflow-hidden flex flex-col min-h-0">
               {loading ? (
                 <div className="flex items-center justify-center h-full">
                   <span className="text-sm" style={{ color: '#cbd3d6' }}>Loading tasks...</span>
