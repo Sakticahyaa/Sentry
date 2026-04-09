@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import { Trash2, Square, CheckSquare } from 'lucide-react'
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import type { Task } from '../types/task'
@@ -52,24 +51,61 @@ export function TaskRow({ task, displayId, onToggleDone, onEdit, onDelete }: Tas
         {...attributes}
         {...listeners}
       >
-        {/* Checkbox — slides in from left on hover */}
+        {/* Slide-in action pills */}
         <div
           style={{
-            width: hovered || isDone ? 26 : 0,
+            width: hovered ? 84 : 0,
             overflow: 'hidden',
             flexShrink: 0,
             transition: 'width 0.15s ease',
             display: 'flex',
             alignItems: 'center',
-            justifyContent: 'center',
+            gap: 4,
+            paddingRight: hovered ? 6 : 0,
           }}
         >
+          {/* Done */}
           <button
             onPointerDown={e => e.stopPropagation()}
             onClick={e => { e.stopPropagation(); onToggleDone(task) }}
-            style={{ color: isDone ? '#8a9499' : '#cbd3d6', display: 'flex', alignItems: 'center' }}
+            style={{
+              background: isDone
+                ? 'linear-gradient(135deg, #6b7280, #9ca3af)'
+                : 'linear-gradient(135deg, #16a34a, #4ade80)',
+              color: '#fff',
+              fontSize: 10,
+              fontWeight: 600,
+              letterSpacing: '0.05em',
+              padding: '2px 7px',
+              borderRadius: 4,
+              whiteSpace: 'nowrap',
+              border: 'none',
+              cursor: 'pointer',
+              flexShrink: 0,
+            }}
           >
-            {isDone ? <CheckSquare size={15} /> : <Square size={15} />}
+            {isDone ? 'Undo' : 'Done'}
+          </button>
+
+          {/* Del */}
+          <button
+            onPointerDown={e => e.stopPropagation()}
+            onClick={e => { e.stopPropagation(); onDelete(task.id) }}
+            style={{
+              background: 'linear-gradient(135deg, #dc2626, #f87171)',
+              color: '#fff',
+              fontSize: 10,
+              fontWeight: 600,
+              letterSpacing: '0.05em',
+              padding: '2px 7px',
+              borderRadius: 4,
+              whiteSpace: 'nowrap',
+              border: 'none',
+              cursor: 'pointer',
+              flexShrink: 0,
+            }}
+          >
+            Del
           </button>
         </div>
 
@@ -86,7 +122,7 @@ export function TaskRow({ task, displayId, onToggleDone, onEdit, onDelete }: Tas
 
         {/* Content — click to edit */}
         <div
-          className="flex-1 flex flex-col justify-center py-1.5 pr-1 min-w-0"
+          className="flex-1 flex flex-col justify-center py-1.5 pr-2 min-w-0"
           onPointerDown={e => e.stopPropagation()}
           onClick={() => setEditing(true)}
           style={{ cursor: 'pointer' }}
@@ -102,32 +138,10 @@ export function TaskRow({ task, displayId, onToggleDone, onEdit, onDelete }: Tas
           >
             {task.title}
           </span>
-          {meta && (
-            <span className="text-xs truncate" style={{ color: '#cbd3d6', fontFamily: "'Space Grotesk', sans-serif" }}>
-              {displayId} · {meta}
-            </span>
-          )}
-          {!meta && (
-            <span className="text-xs truncate" style={{ color: '#cbd3d6', fontFamily: "'Space Grotesk', sans-serif" }}>
-              {displayId}
-            </span>
-          )}
+          <span className="text-xs truncate" style={{ color: '#cbd3d6', fontFamily: "'Space Grotesk', sans-serif" }}>
+            {displayId}{meta ? ` · ${meta}` : ''}
+          </span>
         </div>
-
-        {/* Delete on hover */}
-        <button
-          onPointerDown={e => e.stopPropagation()}
-          onClick={e => { e.stopPropagation(); onDelete(task.id) }}
-          className="shrink-0 p-1 rounded transition-colors hover:bg-red-50"
-          style={{
-            opacity: hovered ? 1 : 0,
-            transition: 'opacity 0.1s',
-            color: '#cbd3d6',
-          }}
-          title="Delete"
-        >
-          <Trash2 size={11} />
-        </button>
       </div>
 
       <Modal open={editing} onClose={() => setEditing(false)} title="Edit Task">
