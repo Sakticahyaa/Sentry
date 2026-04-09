@@ -1,10 +1,11 @@
 import { useState } from 'react'
-import { format, addDays, isToday, parseISO } from 'date-fns'
+import { format, addDays, isToday } from 'date-fns'
 import { Plus } from 'lucide-react'
 import type { Task } from '../types/task'
 import { TaskRow } from './TaskRow'
 import { Modal } from './ui/Modal'
 import { TaskForm } from './TaskForm'
+import { buildDisplayIds } from '../lib/displayId'
 
 interface TeuxViewProps {
   colCount: 1 | 3 | 7
@@ -35,6 +36,7 @@ function sortTasks(tasks: Task[]): Task[] {
 interface DayColumnProps {
   date: Date
   tasks: Task[]
+  displayIds: Map<string, string>
   onToggleDone: (task: Task) => Promise<void>
   onEdit: (id: string, updates: Partial<Task>) => Promise<void>
   onDelete: (id: string) => Promise<void>
@@ -42,7 +44,7 @@ interface DayColumnProps {
   isLast: boolean
 }
 
-function DayColumn({ date, tasks, onToggleDone, onEdit, onDelete, onAdd, isLast }: DayColumnProps) {
+function DayColumn({ date, tasks, displayIds, onToggleDone, onEdit, onDelete, onAdd, isLast }: DayColumnProps) {
   const key = format(date, 'yyyy-MM-dd')
   const dayTasks = sortTasks(tasks.filter(t => t.assigned_date === key))
   const today = isToday(date)
@@ -77,6 +79,7 @@ function DayColumn({ date, tasks, onToggleDone, onEdit, onDelete, onAdd, isLast 
           <TaskRow
             key={task.id}
             task={task}
+            displayId={displayIds.get(task.id) ?? '—'}
             onToggleDone={onToggleDone}
             onEdit={onEdit}
             onDelete={onDelete}
@@ -100,6 +103,7 @@ function DayColumn({ date, tasks, onToggleDone, onEdit, onDelete, onAdd, isLast 
 
 export function TeuxView({ colCount, startDate, tasks, onToggleDone, onEdit, onDelete, onAdd }: TeuxViewProps) {
   const [addingDate, setAddingDate] = useState<string | null>(null)
+  const displayIds = buildDisplayIds(tasks)
 
   const days = Array.from({ length: colCount }, (_, i) => addDays(startDate, i))
 
@@ -114,6 +118,7 @@ export function TeuxView({ colCount, startDate, tasks, onToggleDone, onEdit, onD
             key={format(day, 'yyyy-MM-dd')}
             date={day}
             tasks={tasks}
+            displayIds={displayIds}
             onToggleDone={onToggleDone}
             onEdit={onEdit}
             onDelete={onDelete}

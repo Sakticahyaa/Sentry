@@ -7,19 +7,19 @@ import { TaskForm } from './TaskForm'
 
 interface TaskRowProps {
   task: Task
+  displayId: string
   onToggleDone: (task: Task) => Promise<void>
   onEdit: (id: string, updates: Partial<Task>) => Promise<void>
   onDelete: (id: string) => Promise<void>
 }
 
-export function TaskRow({ task, onToggleDone, onEdit, onDelete }: TaskRowProps) {
+export function TaskRow({ task, displayId, onToggleDone, onEdit, onDelete }: TaskRowProps) {
   const [editing, setEditing] = useState(false)
   const [hovered, setHovered] = useState(false)
 
   const isDone = task.status === 'Done'
   const barColor = useBranchColor(task.branch ?? null)
 
-  // Format: [6-char id] · [title] · [Xh] · [timeblock]
   const parts = [
     task.title,
     task.estimated_time ? `${task.estimated_time}h` : null,
@@ -61,12 +61,15 @@ export function TaskRow({ task, onToggleDone, onEdit, onDelete }: TaskRowProps) 
 
         {/* Task label */}
         <div
-          className="flex-1 flex items-center text-sm py-1 pr-2 leading-snug"
+          className="flex-1 flex items-center gap-2 text-sm py-1 pr-2 leading-snug"
           style={{
             color: isDone ? '#8a9499' : '#232a2e',
             textDecoration: isDone ? 'line-through' : 'none',
           }}
         >
+          <span className="shrink-0 text-xs font-mono" style={{ color: '#cbd3d6', textDecoration: 'none' }}>
+            {displayId}
+          </span>
           {label}
         </div>
 

@@ -2,6 +2,7 @@ import { useEffect } from 'react'
 import { X } from 'lucide-react'
 import type { Task } from '../types/task'
 import { TaskRow } from './TaskRow'
+import { buildDisplayIds } from '../lib/displayId'
 
 interface BacklogProps {
   tasks: Task[]
@@ -13,6 +14,7 @@ interface BacklogProps {
 
 export function Backlog({ tasks, onToggleDone, onEdit, onDelete, onClose }: BacklogProps) {
   const backlogTasks = tasks.filter(t => !t.assigned_date)
+  const displayIds = buildDisplayIds(tasks)
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose() }
@@ -65,6 +67,7 @@ export function Backlog({ tasks, onToggleDone, onEdit, onDelete, onClose }: Back
               <TaskRow
                 key={task.id}
                 task={task}
+                displayId={displayIds.get(task.id) ?? '—'}
                 onToggleDone={onToggleDone}
                 onEdit={onEdit}
                 onDelete={onDelete}
