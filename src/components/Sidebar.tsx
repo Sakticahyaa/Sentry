@@ -112,10 +112,11 @@ export function Sidebar({ view, onViewChange, activeBranch, onBranchChange, onAd
                 onClick={() => onViewChange(v.id)}
                 className="w-full flex items-center gap-1.5 px-2 py-1.5 rounded-lg text-xs transition-all"
                 style={{
-                  backgroundColor: active ? 'var(--t-hover)' : 'transparent',
-                  color: active ? 'var(--t-text)' : 'var(--t-text2)',
-                  fontWeight: active ? 500 : 400,
+                  backgroundColor: active ? 'var(--t-accent-sub)' : 'transparent',
+                  color: active ? 'var(--t-accent)' : 'var(--t-text2)',
+                  fontWeight: active ? 600 : 400,
                   whiteSpace: 'nowrap',
+                  borderLeft: active ? '2px solid var(--t-accent)' : '2px solid transparent',
                 }}
                 onMouseEnter={e => { if (!active) (e.currentTarget as HTMLButtonElement).style.backgroundColor = 'var(--t-hover)' }}
                 onMouseLeave={e => { if (!active) (e.currentTarget as HTMLButtonElement).style.backgroundColor = 'transparent' }}
@@ -147,9 +148,11 @@ export function Sidebar({ view, onViewChange, activeBranch, onBranchChange, onAd
                 }}
                 className="w-full flex items-center gap-1.5 px-2 py-1 rounded-lg text-xs transition-all mb-0.5"
                 style={{
-                  backgroundColor: active ? 'var(--t-hover)' : 'transparent',
-                  color: active ? 'var(--t-text)' : 'var(--t-text2)',
+                  backgroundColor: active ? 'var(--t-accent-sub)' : 'transparent',
+                  color: active ? 'var(--t-accent)' : 'var(--t-text2)',
+                  fontWeight: active ? 600 : 400,
                   whiteSpace: 'nowrap',
+                  borderLeft: active ? '2px solid var(--t-accent)' : '2px solid transparent',
                 }}
                 onMouseEnter={e => { if (!active) (e.currentTarget as HTMLButtonElement).style.backgroundColor = 'var(--t-hover)' }}
                 onMouseLeave={e => { if (!active) (e.currentTarget as HTMLButtonElement).style.backgroundColor = 'transparent' }}
