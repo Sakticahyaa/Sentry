@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Pencil, Trash2 } from 'lucide-react'
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import type { Task } from '../types/task'
@@ -16,6 +17,7 @@ interface TaskRowProps {
 
 export function TaskRow({ task, displayId, onToggleDone, onEdit, onDelete }: TaskRowProps) {
   const [editing, setEditing] = useState(false)
+  const [confirming, setConfirming] = useState(false)
   const [hovered, setHovered] = useState(false)
 
   const isDone = task.status === 'Done'
@@ -34,19 +36,6 @@ export function TaskRow({ task, displayId, onToggleDone, onEdit, onDelete }: Tas
     setEditing(false)
   }
 
-  const pillBtn: React.CSSProperties = {
-    fontSize: 10,
-    fontWeight: 600,
-    letterSpacing: '0.05em',
-    padding: '2px 7px',
-    borderRadius: 4,
-    whiteSpace: 'nowrap',
-    border: 'none',
-    cursor: 'pointer',
-    flexShrink: 0,
-    color: '#fff',
-  }
-
   return (
     <>
       <div
@@ -61,49 +50,21 @@ export function TaskRow({ task, displayId, onToggleDone, onEdit, onDelete }: Tas
         className="relative flex items-center select-none cursor-grab active:cursor-grabbing"
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}
+        onClick={() => onToggleDone(task)}
         {...attributes}
         {...listeners}
       >
-        {/* Done pill — left */}
-        <div style={{
-          width: hovered ? 50 : 0,
-          overflow: 'hidden',
-          flexShrink: 0,
-          transition: 'width 0.13s ease',
-          display: 'flex',
-          alignItems: 'center',
-          paddingRight: hovered ? 6 : 0,
-        }}>
-          <button
-            onPointerDown={e => e.stopPropagation()}
-            onClick={e => { e.stopPropagation(); onToggleDone(task) }}
-            style={{
-              ...pillBtn,
-              background: isDone
-                ? 'linear-gradient(135deg, #6b7280, #9ca3af)'
-                : 'linear-gradient(135deg, #16a34a, #4ade80)',
-            }}
-          >
-            {isDone ? 'Undo' : 'Done'}
-          </button>
-        </div>
-
         {/* Branch color strip */}
         <div style={{
           width: 3, borderRadius: 3,
           backgroundColor: barColor,
           flexShrink: 0,
           alignSelf: 'stretch',
-          margin: '5px 10px 5px 0',
+          margin: '5px 10px 5px 13px',
         }} />
 
-        {/* Content — click to edit */}
-        <div
-          className="flex-1 flex flex-col justify-center py-1.5 min-w-0"
-          onPointerDown={e => e.stopPropagation()}
-          onClick={() => setEditing(true)}
-          style={{ cursor: 'pointer' }}
-        >
+        {/* Content */}
+        <div className="flex-1 flex flex-col justify-center py-1.5 min-w-0">
           <span style={{
             fontFamily: "'DM Mono', monospace",
             fontSize: 14,
@@ -128,29 +89,33 @@ export function TaskRow({ task, displayId, onToggleDone, onEdit, onDelete }: Tas
           </span>
         </div>
 
-        {/* Del pill — right */}
-        <div style={{
-          width: hovered ? 46 : 0,
-          overflow: 'hidden',
-          flexShrink: 0,
-          transition: 'width 0.13s ease',
-          display: 'flex',
-          alignItems: 'center',
-          paddingLeft: hovered ? 6 : 0,
-        }}>
+        {/* Hover actions */}
+        <div
+          className="flex items-center gap-0.5 px-1 shrink-0"
+          style={{ opacity: hovered ? 1 : 0, transition: 'opacity 0.1s' }}
+          onClick={e => e.stopPropagation()}
+          onPointerDown={e => e.stopPropagation()}
+        >
           <button
-            onPointerDown={e => e.stopPropagation()}
-            onClick={e => { e.stopPropagation(); onDelete(task.id) }}
-            style={{
-              ...pillBtn,
-              background: 'linear-gradient(135deg, #dc2626, #f87171)',
-            }}
+            onClick={() => setEditing(true)}
+            className="p-1 rounded transition-colors hover:bg-[#f0f0f0]"
+            style={{ color: '#8a9499' }}
+            title="Edit"
           >
-            Del
+            <Pencil size={11} />
+          </button>
+          <button
+            onClick={() => setConfirming(true)}
+            className="p-1 rounded transition-colors hover:bg-red-50"
+            style={{ color: '#8a9499' }}
+            title="Delete"
+          >
+            <Trash2 size={11} />
           </button>
         </div>
       </div>
 
+      {/* Edit modal */}
       <Modal open={editing} onClose={() => setEditing(false)} title="Edit Task">
         <TaskForm
           initial={task}
@@ -158,6 +123,23 @@ export function TaskRow({ task, displayId, onToggleDone, onEdit, onDelete }: Tas
           onCancel={() => setEditing(false)}
           submitLabel="Update"
         />
+      </Modal>
+
+      {/* Delete confirmation modal */}
+      <Modal open={confirming} onClose={() => setConfirming(false)} title="Delete Task">
+        <p className="text-sm mb-5" style={{ color: '#232a2e' }}>
+          Delete <strong>"{task.title}"</strong>? This cannot be undone.
+        </p>
+        <div className="flex gap-2 justify-end">
+          <button className="btn-ghost" onClick={() => setConfirming(false)}>Cancel</button>
+          <button
+            className="btn text-white"
+            style={{ background: '#dc2626' }}
+            onClick={() => { setConfirming(false); onDelete(task.id) }}
+          >
+            Delete
+          </button>
+        </div>
       </Modal>
     </>
   )
