@@ -1,4 +1,4 @@
-import { ChevronLeft, ChevronRight, Calendar, LogOut, GitBranch, Sun, Moon } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Calendar, LogOut, GitBranch, Sun, Moon, Inbox } from 'lucide-react'
 import { format, addDays } from 'date-fns'
 
 type ColCount = 1 | 3 | 7
@@ -121,7 +121,9 @@ export function TopBar({
         style={{ color: '#232a2e', border: '1px solid #cbd3d6' }}
         onMouseEnter={e => (e.currentTarget.style.borderColor = '#232a2e')}
         onMouseLeave={e => (e.currentTarget.style.borderColor = '#cbd3d6')}
+        title="Backlog"
       >
+        <Inbox size={12} className="sm:hidden" />
         <span className="hidden sm:inline">Backlog</span>
         {backlogCount > 0 && (
           <span

@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { startOfWeek, addDays, format } from 'date-fns'
-import { ChevronLeft, ChevronRight } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Menu } from 'lucide-react'
 import { Routes, Route, Navigate, useNavigate } from 'react-router-dom'
 import { useAuth } from './hooks/useAuth'
 import { useTasks } from './hooks/useTasks'
@@ -53,6 +53,7 @@ export default function App() {
   const [activeBranch, setActiveBranch] = useState<Branch | null>(null)
   const [search, setSearch]             = useState('')
   const [showLegacyAdd, setShowLegacyAdd] = useState(false)
+  const [mobileSidebar, setMobileSidebar] = useState(false)
 
   const { theme, toggle: toggleTheme } = useTheme()
   const rolledOver = useRef(false)
@@ -187,6 +188,8 @@ export default function App() {
                 onManageBranches={() => setShowBranchMgr(true)}
                 onSwitchToTeux={() => navigate('/hall')}
                 onSignOut={signOut}
+                mobileOpen={mobileSidebar}
+                onMobileClose={() => setMobileSidebar(false)}
               />
 
               <div className="flex flex-col flex-1 overflow-hidden">
@@ -195,6 +198,14 @@ export default function App() {
                   className="relative flex items-center gap-2 px-4 shrink-0"
                   style={{ height: 52, borderBottom: '1px solid var(--t-border)', background: 'var(--t-card)' }}
                 >
+                  {/* Hamburger — mobile only */}
+                  <button
+                    className="sm:hidden btn-ghost p-1.5 mr-1"
+                    onClick={() => setMobileSidebar(true)}
+                    style={{ color: 'var(--t-text3)' }}
+                  >
+                    <Menu size={16} />
+                  </button>
                   <span
                     className="absolute left-1/2 -translate-x-1/2 text-xs font-bold tracking-[0.2em] uppercase pointer-events-none"
                     style={{ color: 'var(--t-text)' }}

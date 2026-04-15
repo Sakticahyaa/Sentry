@@ -70,7 +70,8 @@ export function BoardView({ tasks, onEdit, onDelete, onCycle, onAdd }: BoardView
       </div>
 
       {/* Columns */}
-      <div className="flex-1 overflow-hidden grid gap-3 p-4" style={{ gridTemplateColumns: '1fr 1fr 1fr 1fr' }}>
+      <div className="flex-1 overflow-auto">
+      <div className="grid gap-3 p-4 h-full" style={{ gridTemplateColumns: 'repeat(4, minmax(220px, 1fr))' }}>
 
         {/* Backlog column */}
         <div
@@ -142,6 +143,7 @@ export function BoardView({ tasks, onEdit, onDelete, onCycle, onAdd }: BoardView
             </div>
           )
         })}
+      </div>
       </div>
 
       <Modal open={!!addingStatus} onClose={() => setAddingStatus(null)} title="New Task">
