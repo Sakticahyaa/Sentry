@@ -1,5 +1,6 @@
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { Square, CheckSquare } from 'lucide-react'
+
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import type { Task } from '../types/task'
@@ -19,9 +20,25 @@ export function TaskRow({ task, displayId, onToggleDone, onEdit, onDelete }: Tas
   const [editing, setEditing] = useState(false)
   const [deleting, setDeleting] = useState(false)
   const [hovered, setHovered] = useState(false)
+  const [swipeDx, setSwipeDx] = useState(0)
+  const touchStartX = useRef<number | null>(null)
 
   const isDone = task.status === 'Done'
   const barColor = useBranchColor(task.branch ?? null)
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX
+  }
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (touchStartX.current === null) return
+    const dx = e.touches[0].clientX - touchStartX.current
+    if (dx > 0) setSwipeDx(Math.min(dx, 80))
+  }
+  const handleTouchEnd = () => {
+    if (swipeDx > 60) onToggleDone(task)
+    setSwipeDx(0)
+    touchStartX.current = null
+  }
 
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: task.id })
 
@@ -42,17 +59,35 @@ export function TaskRow({ task, displayId, onToggleDone, onEdit, onDelete }: Tas
         ref={setNodeRef}
         style={{
           transform: CSS.Transform.toString(transform),
-          transition,
+          transition: swipeDx > 0 ? 'none' : transition,
           opacity: isDragging ? 0.35 : 1,
           minHeight: '36px',
           borderBottom: '1px solid rgba(35,42,46,0.07)',
+          position: 'relative',
+          overflow: 'hidden',
         }}
         className="relative flex items-center select-none cursor-grab active:cursor-grabbing"
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
         {...attributes}
         {...listeners}
       >
+        {/* Swipe-to-done background */}
+        {swipeDx > 0 && (
+          <div style={{
+            position: 'absolute', inset: 0,
+            backgroundColor: isDone ? '#f87171' : '#22c55e',
+            opacity: swipeDx / 80,
+            display: 'flex', alignItems: 'center', paddingLeft: 12,
+            pointerEvents: 'none',
+          }}>
+            <CheckSquare size={14} color="white" />
+          </div>
+        )}
+        <div style={{ transform: `translateX(${swipeDx}px)`, transition: swipeDx > 0 ? 'none' : 'transform 0.2s ease', width: '100%', display: 'flex', alignItems: 'center' }}>
         {/* Checkbox — slides in from left on hover */}
         <div style={{
           width: hovered || isDone ? 28 : 0,
@@ -110,6 +145,7 @@ export function TaskRow({ task, displayId, onToggleDone, onEdit, onDelete }: Tas
           }}>
             {displayId}{meta ? ` · ${meta}` : ''}
           </span>
+        </div>
         </div>
       </div>
 
