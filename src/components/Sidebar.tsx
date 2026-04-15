@@ -222,7 +222,7 @@ export function Sidebar({
           style={{
             width: mobileOpen ? 220 : 0,
             transition: 'width 0.2s ease',
-            backgroundColor: 'var(--t-elevated)',
+            backgroundColor: 'var(--t-card)',
             borderRight: '1px solid var(--t-border)',
           }}
         >
@@ -238,7 +238,7 @@ export function Sidebar({
       style={{
         width: expanded ? 168 : 44,
         transition: 'width 0.2s ease',
-        backgroundColor: 'var(--t-elevated)',
+        backgroundColor: 'var(--t-card)',
         borderColor: 'var(--t-border)',
       }}
     >
