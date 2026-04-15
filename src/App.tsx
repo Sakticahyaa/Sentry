@@ -141,6 +141,8 @@ export default function App() {
                 onDelete={removeTask}
                 onAdd={addTask}
                 onReorder={reorder}
+                onPrev={() => setStartDate(addDays(startDate, colCount === 7 ? -7 : -1))}
+                onNext={() => setStartDate(addDays(startDate, colCount === 7 ? 7 : 1))}
               />
             ) : (
               <CalendarView tasks={tasks} onDayClick={handleCalendarDayClick} />

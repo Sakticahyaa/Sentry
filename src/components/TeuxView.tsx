@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { format, addDays, isToday } from 'date-fns'
 import { Plus } from 'lucide-react'
 import {
@@ -23,6 +23,8 @@ interface TeuxViewProps {
   onDelete: (id: string) => Promise<void>
   onAdd: (data: Partial<Task>) => Promise<void>
   onReorder: (updates: { id: string; order: number }[]) => Promise<void>
+  onPrev: () => void
+  onNext: () => void
 }
 
 const BLOCK_ORDER: Record<string, number> = {
@@ -131,9 +133,21 @@ function DayColumn({ date, tasks, displayIds, hoverable, onToggleDone, onEdit, o
   )
 }
 
-export function TeuxView({ colCount, startDate, tasks, onToggleDone, onEdit, onDelete, onAdd, onReorder }: TeuxViewProps) {
+export function TeuxView({ colCount, startDate, tasks, onToggleDone, onEdit, onDelete, onAdd, onReorder, onPrev, onNext }: TeuxViewProps) {
   const [addingDate, setAddingDate] = useState<string | null>(null)
   const displayIds = buildDisplayIds(tasks)
+
+  // Swipe to navigate days
+  const touchStartX = useRef<number | null>(null)
+  const handleTouchStart = (e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX
+  }
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (touchStartX.current === null) return
+    const dx = e.changedTouches[0].clientX - touchStartX.current
+    if (Math.abs(dx) > 50) dx < 0 ? onNext() : onPrev()
+    touchStartX.current = null
+  }
 
   const days = Array.from({ length: colCount }, (_, i) => addDays(startDate, i))
 
@@ -153,7 +167,12 @@ export function TeuxView({ colCount, startDate, tasks, onToggleDone, onEdit, onD
   ))
 
   return (
-    <div className="flex-1 overflow-auto" style={{ height: 'calc(100vh - 52px)' }}>
+    <div
+      className="flex-1 overflow-auto"
+      style={{ height: 'calc(100vh - 52px)' }}
+      onTouchStart={handleTouchStart}
+      onTouchEnd={handleTouchEnd}
+    >
       <div
         className="grid h-full"
         style={{ gridTemplateColumns: `repeat(${colCount}, 1fr)` }}

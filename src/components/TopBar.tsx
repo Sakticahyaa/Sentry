@@ -1,4 +1,4 @@
-import { ChevronLeft, ChevronRight, Calendar, LogOut, GitBranch, Sun, Moon, Inbox } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Calendar, LogOut, GitBranch, Sun, Moon, Inbox, LayoutGrid } from 'lucide-react'
 import { format, addDays } from 'date-fns'
 
 type ColCount = 1 | 3 | 7
@@ -135,9 +135,10 @@ export function TopBar({
         )}
       </button>
 
-      {/* Legacy — hidden on mobile */}
-      <button onClick={onLegacy} className="hidden sm:block btn-ghost text-xs px-2 py-1">
-        Control
+      {/* Control — icon on mobile, text on desktop */}
+      <button onClick={onLegacy} className="btn-ghost px-2 py-1 text-xs" title="Control">
+        <LayoutGrid size={14} className="sm:hidden" />
+        <span className="hidden sm:inline">Control</span>
       </button>
 
       <button onClick={onToggleTheme} className="btn-ghost px-2 py-1" title="Toggle theme">
