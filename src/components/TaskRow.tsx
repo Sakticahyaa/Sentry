@@ -89,7 +89,7 @@ export function TaskRow({ task, displayId, onToggleDone, onEdit, onDelete }: Tas
           style={{ cursor: 'pointer' }}
         >
           <span style={{
-            fontFamily: "'DM Mono', monospace",
+            fontFamily: "'Lato', sans-serif",
             fontSize: 14,
             lineHeight: 1.4,
             color: isDone ? '#8a9499' : '#232a2e',
