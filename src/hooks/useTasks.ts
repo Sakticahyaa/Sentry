@@ -5,8 +5,6 @@ import { fetchTasks, createTask, updateTask, deleteTask, bulkUpdateTasks, reorde
 const defaultFilters: Filters = {
   branch: null,
   status: null,
-  time_block: null,
-  priority: null,
   search: '',
   assigned_date_from: null,
   assigned_date_to: null,
@@ -58,15 +56,6 @@ export function useTasks(initialFilters?: Partial<Filters>, enabled = true) {
     )
   }
 
-  const cycleStatus = async (task: Task) => {
-    const next: Record<Task['status'], Task['status']> = {
-      'Not Yet': 'Ongoing',
-      'Ongoing': 'Done',
-      'Done': 'Not Yet',
-    }
-    await editTask(task.id, { status: next[task.status] })
-  }
-
   const reorder = async (updates: { id: string; order: number }[]) => {
     setTasks(prev => {
       const map = new Map(updates.map(u => [u.id, u.order]))
@@ -91,7 +80,6 @@ export function useTasks(initialFilters?: Partial<Filters>, enabled = true) {
     editTask,
     removeTask,
     bulkUpdate,
-    cycleStatus,
     reorder,
     updateFilter,
     clearFilters,

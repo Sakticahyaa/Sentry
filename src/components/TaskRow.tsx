@@ -55,12 +55,6 @@ export function TaskRow({ task, displayId, onToggleDone, onEdit, onDelete }: Tas
 
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: task.id })
 
-  const meta = [
-    task.estimated_time ? `${task.estimated_time}h` : null,
-    task.time_block ?? null,
-    task.priority ? `P${task.priority}` : null,
-  ].filter(Boolean).join(' · ')
-
   const handleEdit = async (updates: Partial<Task>) => {
     await onEdit(task.id, updates)
     setEditing(false)
@@ -148,16 +142,18 @@ export function TaskRow({ task, displayId, onToggleDone, onEdit, onDelete }: Tas
           }}>
             {task.title}
           </span>
-          <span style={{
-            fontFamily: "'Space Grotesk', sans-serif",
-            fontSize: 11,
-            color: '#8a9499',
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
-            whiteSpace: 'nowrap',
-          }}>
-            {displayId}{meta ? ` · ${meta}` : ''}
-          </span>
+          {task.branch && (
+            <span style={{
+              fontFamily: "'Space Grotesk', sans-serif",
+              fontSize: 11,
+              color: '#8a9499',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
+            }}>
+              {task.branch}
+            </span>
+          )}
         </div>
         </div>
       </div>

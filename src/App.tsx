@@ -69,7 +69,7 @@ export default function App() {
     return () => mq.removeEventListener('change', (e) => apply(e.matches))
   }, [])
 
-  const { tasks, loading, addTask, editTask, removeTask, cycleStatus, reorder, setTasks } = useTasks(undefined, !!user)
+  const { tasks, loading, addTask, editTask, removeTask, reorder, setTasks } = useTasks(undefined, !!user)
   const { branches, getColor, addBranch, removeBranch, editBranch } = useBranches(!!user)
 
   const tasksRef = useRef(tasks)
@@ -286,11 +286,11 @@ export default function App() {
                       />
                     </>
                   ) : legacyView === 'daily' ? (
-                    <DailyView tasks={filteredTasks} onEdit={editTask} onDelete={removeTask} onCycle={cycleStatus} onAdd={addTask} setTasks={setTasks} />
+                    <DailyView tasks={filteredTasks} onEdit={editTask} onDelete={removeTask} onAdd={addTask} setTasks={setTasks} />
                   ) : legacyView === 'board' ? (
-                    <BoardView tasks={filteredTasks} onEdit={editTask} onDelete={removeTask} onCycle={cycleStatus} onAdd={addTask} />
+                    <BoardView tasks={filteredTasks} onEdit={editTask} onDelete={removeTask} onAdd={addTask} />
                   ) : (
-                    <BranchView tasks={filteredTasks} activeBranch={activeBranch} onEdit={editTask} onDelete={removeTask} onCycle={cycleStatus} />
+                    <BranchView tasks={filteredTasks} activeBranch={activeBranch} onEdit={editTask} onDelete={removeTask} />
                   )}
                 </div>
               </div>

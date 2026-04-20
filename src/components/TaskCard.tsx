@@ -1,19 +1,28 @@
 import { useState } from 'react'
-import { GripVertical, Pencil, Trash2, Clock, Calendar, Square, CheckSquare } from 'lucide-react'
+import { GripVertical, Pencil, Trash2, Square, CheckSquare } from 'lucide-react'
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import type { Task } from '../types/task'
-import { BranchBadge, PriorityBadge } from './ui/Badge'
+import { useBranchColor } from '../hooks/useBranches'
 import { Modal } from './ui/Modal'
 import { TaskForm } from './TaskForm'
-import { differenceInCalendarDays, parseISO } from 'date-fns'
 
 interface TaskCardProps {
   task: Task
   onEdit: (id: string, updates: Partial<Task>) => Promise<void>
   onDelete: (id: string) => Promise<void>
-  onCycle?: (task: Task) => Promise<void>
   isDraggable?: boolean
+}
+
+function BranchStrip({ branch }: { branch: string | null }) {
+  const color = useBranchColor(branch)
+  if (!branch) return null
+  return (
+    <span className="inline-flex items-center gap-1.5 text-xs" style={{ color: 'var(--t-text2)' }}>
+      <span style={{ width: 3, height: 13, borderRadius: 2, backgroundColor: color, flexShrink: 0, display: 'inline-block' }} />
+      {branch}
+    </span>
+  )
 }
 
 export function TaskCard({ task, onEdit, onDelete, isDraggable = true }: TaskCardProps) {
@@ -33,18 +42,6 @@ export function TaskCard({ task, onEdit, onDelete, isDraggable = true }: TaskCar
   }
 
   const isDone = task.status === 'Done'
-
-  const deadlineDays = task.deadline
-    ? differenceInCalendarDays(parseISO(task.deadline), new Date())
-    : null
-
-  const dl = (() => {
-    if (deadlineDays === null) return null
-    if (deadlineDays < 0)  return { text: `${Math.abs(deadlineDays)}d overdue`, cls: 'text-red-500' }
-    if (deadlineDays === 0) return { text: 'Today',    cls: 'text-orange-500' }
-    if (deadlineDays === 1) return { text: 'Tomorrow', cls: 'text-amber-500' }
-    return { text: `${deadlineDays}d left`, cls: '' }
-  })()
 
   const handleEdit = async (updates: Partial<Task>) => {
     await onEdit(task.id, updates)
@@ -114,27 +111,8 @@ export function TaskCard({ task, onEdit, onDelete, isDraggable = true }: TaskCar
                 {task.title}
               </p>
 
-              <div className="flex flex-wrap items-center gap-1.5 mt-1.5">
-                <PriorityBadge priority={task.priority} />
-                {task.branch && <BranchBadge branch={task.branch} />}
-                {task.time_block && (
-                  <span
-                    className="text-xs px-1.5 py-0.5 rounded"
-                    style={{ backgroundColor: 'var(--t-hover)', color: 'var(--t-text3)' }}
-                  >
-                    {task.time_block}
-                  </span>
-                )}
-                {task.estimated_time && (
-                  <span className="flex items-center gap-0.5 text-xs" style={{ color: 'var(--t-text3)' }}>
-                    <Clock size={10} /> {task.estimated_time}h
-                  </span>
-                )}
-                {dl && (
-                  <span className={`flex items-center gap-0.5 text-xs ${dl.cls}`} style={!dl.cls ? { color: 'var(--t-text3)' } : {}}>
-                    <Calendar size={10} /> {dl.text}
-                  </span>
-                )}
+              <div className="flex flex-wrap items-center gap-1.5 mt-1">
+                <BranchStrip branch={task.branch} />
               </div>
 
               {task.notes && (
@@ -161,6 +139,7 @@ export function TaskCard({ task, onEdit, onDelete, isDraggable = true }: TaskCar
           onSubmit={handleEdit}
           onCancel={() => setEditing(false)}
           submitLabel="Update"
+          onDelete={() => { setEditing(false); handleDelete() }}
         />
       </Modal>
     </>

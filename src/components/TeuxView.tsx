@@ -25,19 +25,12 @@ interface TeuxViewProps {
   onReorder: (updates: { id: string; order: number }[]) => Promise<void>
 }
 
-const BLOCK_ORDER: Record<string, number> = {
-  H0: 0, Q1: 1, Q2: 2, H1: 3, Q3: 4, Q4: 5, H2: 6, Q5: 7, Q6: 8, H3: 9,
-}
-
 function sortTasks(tasks: Task[]): Task[] {
   return [...tasks].sort((a, b) => {
     const aDone = a.status === 'Done' ? 1 : 0
     const bDone = b.status === 'Done' ? 1 : 0
     if (aDone !== bDone) return aDone - bDone
-    const aOrd = a.time_block != null ? (BLOCK_ORDER[a.time_block] ?? 10) : 10
-    const bOrd = b.time_block != null ? (BLOCK_ORDER[b.time_block] ?? 10) : 10
-    if (aOrd !== bOrd) return aOrd - bOrd
-    return a.priority - b.priority
+    return a.order - b.order
   })
 }
 

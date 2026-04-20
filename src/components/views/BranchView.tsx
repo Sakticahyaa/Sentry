@@ -1,5 +1,4 @@
 import { useMemo } from 'react'
-import { parseISO, isPast } from 'date-fns'
 import type { Task, Branch } from '../../types/task'
 import { TaskCard } from '../TaskCard'
 import { useBranchList, useBranchColor } from '../../hooks/useBranches'
@@ -9,7 +8,6 @@ interface BranchViewProps {
   activeBranch: Branch | null
   onEdit: (id: string, updates: Partial<Task>) => Promise<void>
   onDelete: (id: string) => Promise<void>
-  onCycle: (task: Task) => Promise<void>
 }
 
 function BranchStrip({ name }: { name: string }) {
@@ -23,16 +21,12 @@ interface BranchSectionProps {
   showEmpty: boolean
   onEdit: (id: string, updates: Partial<Task>) => Promise<void>
   onDelete: (id: string) => Promise<void>
-  onCycle: (task: Task) => Promise<void>
 }
 
-function BranchSection({ branch, tasks: branchTasks, showEmpty, onEdit, onDelete, onCycle }: BranchSectionProps) {
-  const color = useBranchColor(branch)
-  const overdue = branchTasks.filter(t =>
-    t.deadline && isPast(parseISO(t.deadline)) && t.status !== 'Done'
-  ).length
+function BranchSection({ branch, tasks: branchTasks, showEmpty, onEdit, onDelete }: BranchSectionProps) {
   const done = branchTasks.filter(t => t.status === 'Done').length
   const pct = branchTasks.length > 0 ? Math.round((done / branchTasks.length) * 100) : 0
+  const color = useBranchColor(branch)
 
   if (branchTasks.length === 0 && !showEmpty) return null
 
@@ -42,11 +36,6 @@ function BranchSection({ branch, tasks: branchTasks, showEmpty, onEdit, onDelete
         <BranchStrip name={branch} />
         <h2 className="font-semibold" style={{ color: 'var(--t-text)' }}>{branch}</h2>
         <span className="text-xs" style={{ color: 'var(--t-text4)' }}>{branchTasks.length} tasks</span>
-        {overdue > 0 && (
-          <span className="text-xs text-red-500 bg-red-500/10 px-1.5 py-0.5 rounded">
-            {overdue} overdue
-          </span>
-        )}
         <div className="ml-auto flex items-center gap-2">
           <div className="w-24 h-1.5 rounded-full overflow-hidden" style={{ backgroundColor: 'var(--t-hover)' }}>
             <div
@@ -61,7 +50,7 @@ function BranchSection({ branch, tasks: branchTasks, showEmpty, onEdit, onDelete
       {branchTasks.length > 0 ? (
         <div className="space-y-2">
           {branchTasks.map(task => (
-            <TaskCard key={task.id} task={task} onEdit={onEdit} onDelete={onDelete} onCycle={onCycle} isDraggable={false} />
+            <TaskCard key={task.id} task={task} onEdit={onEdit} onDelete={onDelete} isDraggable={false} />
           ))}
         </div>
       ) : (
@@ -76,7 +65,7 @@ function BranchSection({ branch, tasks: branchTasks, showEmpty, onEdit, onDelete
   )
 }
 
-export function BranchView({ tasks, activeBranch, onEdit, onDelete, onCycle }: BranchViewProps) {
+export function BranchView({ tasks, activeBranch, onEdit, onDelete }: BranchViewProps) {
   const allBranches = useBranchList()
   const branches = activeBranch ? [activeBranch] : allBranches.map(b => b.name)
 
@@ -85,12 +74,7 @@ export function BranchView({ tasks, activeBranch, onEdit, onDelete, onCycle }: B
     for (const b of branches) {
       map.set(b, tasks
         .filter(t => t.branch === b)
-        .sort((a, b) => {
-          if (!a.deadline && !b.deadline) return a.priority - b.priority
-          if (!a.deadline) return 1
-          if (!b.deadline) return -1
-          return a.deadline.localeCompare(b.deadline)
-        })
+        .sort((a, b) => a.order - b.order)
       )
     }
     return map
@@ -106,7 +90,6 @@ export function BranchView({ tasks, activeBranch, onEdit, onDelete, onCycle }: B
           showEmpty={!!activeBranch}
           onEdit={onEdit}
           onDelete={onDelete}
-          onCycle={onCycle}
         />
       ))}
     </div>

@@ -7,9 +7,8 @@ import {
 import {
   SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy, arrayMove,
 } from '@dnd-kit/sortable'
-import type { Task, TimeBlock } from '../../types/task'
+import type { Task } from '../../types/task'
 import { TaskCard } from '../TaskCard'
-import { TIME_BLOCKS } from '../../constants/timeblocks'
 import { Modal } from '../ui/Modal'
 import { TaskForm } from '../TaskForm'
 import { reorderTasks } from '../../lib/supabase'
@@ -18,14 +17,12 @@ interface DailyViewProps {
   tasks: Task[]
   onEdit: (id: string, updates: Partial<Task>) => Promise<void>
   onDelete: (id: string) => Promise<void>
-  onCycle: (task: Task) => Promise<void>
   onAdd: (data: Partial<Task>) => Promise<void>
   setTasks: React.Dispatch<React.SetStateAction<Task[]>>
 }
 
-export function DailyView({ tasks, onEdit, onDelete, onCycle, onAdd, setTasks }: DailyViewProps) {
+export function DailyView({ tasks, onEdit, onDelete, onAdd, setTasks }: DailyViewProps) {
   const [date, setDate] = useState(format(new Date(), 'yyyy-MM-dd'))
-  const [groupByBlock, setGroupByBlock] = useState(false)
   const [adding, setAdding] = useState(false)
 
   const sensors = useSensors(
@@ -33,19 +30,14 @@ export function DailyView({ tasks, onEdit, onDelete, onCycle, onAdd, setTasks }:
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
   )
 
-  const BLOCK_ORDER: Record<string, number> = {
-    H0: 0, Q1: 1, Q2: 2, H1: 3, Q3: 4, Q4: 5, H2: 6, Q5: 7, Q6: 8, H3: 9,
-  }
-
   const dayTasks = useMemo(() =>
     tasks
       .filter(t => t.assigned_date === date)
       .sort((a, b) => {
-        const aBlock = a.time_block != null ? (BLOCK_ORDER[a.time_block] ?? 99) : 99
-        const bBlock = b.time_block != null ? (BLOCK_ORDER[b.time_block] ?? 99) : 99
-        if (aBlock !== bBlock) return aBlock - bBlock
-        if (a.priority !== b.priority) return a.priority - b.priority
-        return (a.branch ?? '').localeCompare(b.branch ?? '')
+        const aDone = a.status === 'Done' ? 1 : 0
+        const bDone = b.status === 'Done' ? 1 : 0
+        if (aDone !== bDone) return aDone - bDone
+        return a.order - b.order
       }),
     [tasks, date]
   )
@@ -63,17 +55,6 @@ export function DailyView({ tasks, onEdit, onDelete, onCycle, onAdd, setTasks }:
     })
     await reorderTasks(reordered.map((t, i) => ({ id: t.id, order: i })))
   }
-
-  const grouped = useMemo(() => {
-    if (!groupByBlock) return null
-    const map = new Map<TimeBlock | 'none', Task[]>()
-    for (const t of dayTasks) {
-      const key = t.time_block ?? 'none'
-      if (!map.has(key)) map.set(key, [])
-      map.get(key)!.push(t)
-    }
-    return map
-  }, [dayTasks, groupByBlock])
 
   const isCurrentDay = isToday(parseISO(date))
 
@@ -105,66 +86,19 @@ export function DailyView({ tasks, onEdit, onDelete, onCycle, onAdd, setTasks }:
         </button>
       </div>
 
-      {/* Group by block toggle */}
-      <div className="flex items-center justify-between mb-4">
-        <span className="text-xs" style={{ color: 'var(--t-text3)' }}>{dayTasks.length} tasks</span>
-        <label className="flex items-center gap-1.5 text-xs cursor-pointer" style={{ color: 'var(--t-text3)' }}>
-          <input
-            type="checkbox"
-            checked={groupByBlock}
-            onChange={e => setGroupByBlock(e.target.checked)}
-            style={{ accentColor: 'var(--t-accent)' }}
-          />
-          Group by time block
-        </label>
+      <div className="mb-4">
+        <span className="text-xs" style={{ color: 'var(--t-text3)' }}>{dayTasks.length} task{dayTasks.length !== 1 ? 's' : ''}</span>
       </div>
 
       {/* Task list */}
       <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-        {!groupByBlock ? (
-          <SortableContext items={dayTasks.map(t => t.id)} strategy={verticalListSortingStrategy}>
-            <div className="space-y-2">
-              {dayTasks.map(task => (
-                <TaskCard key={task.id} task={task} onEdit={onEdit} onDelete={onDelete} onCycle={onCycle} />
-              ))}
-            </div>
-          </SortableContext>
-        ) : (
-          <div className="space-y-6">
-            {TIME_BLOCKS.map(block => {
-              const blockTasks = grouped?.get(block.value) ?? []
-              if (blockTasks.length === 0) return null
-              return (
-                <div key={block.value}>
-                  <div className="flex items-center gap-2 mb-2">
-                    <span className="text-xs font-bold uppercase tracking-wider" style={{ color: 'var(--t-text3)' }}>{block.label}</span>
-                    <span className="text-xs" style={{ color: 'var(--t-text4)' }}>{block.range}</span>
-                    <span className="text-xs ml-auto" style={{ color: 'var(--t-text4)' }}>{blockTasks.length} tasks</span>
-                  </div>
-                  <SortableContext items={blockTasks.map(t => t.id)} strategy={verticalListSortingStrategy}>
-                    <div className="space-y-2">
-                      {blockTasks.map(task => (
-                        <TaskCard key={task.id} task={task} onEdit={onEdit} onDelete={onDelete} onCycle={onCycle} />
-                      ))}
-                    </div>
-                  </SortableContext>
-                </div>
-              )
-            })}
-            {(grouped?.get('none') ?? []).length > 0 && (
-              <div>
-                <div className="flex items-center gap-2 mb-2">
-                  <span className="text-xs font-bold uppercase tracking-wider" style={{ color: 'var(--t-text4)' }}>No Block</span>
-                </div>
-                <div className="space-y-2">
-                  {(grouped?.get('none') ?? []).map(task => (
-                    <TaskCard key={task.id} task={task} onEdit={onEdit} onDelete={onDelete} onCycle={onCycle} />
-                  ))}
-                </div>
-              </div>
-            )}
+        <SortableContext items={dayTasks.map(t => t.id)} strategy={verticalListSortingStrategy}>
+          <div className="space-y-2">
+            {dayTasks.map(task => (
+              <TaskCard key={task.id} task={task} onEdit={onEdit} onDelete={onDelete} />
+            ))}
           </div>
-        )}
+        </SortableContext>
       </DndContext>
 
       {dayTasks.length === 0 && (

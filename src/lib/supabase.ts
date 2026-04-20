@@ -23,9 +23,7 @@ export async function fetchTasks(filters?: Partial<Filters>): Promise<Task[]> {
 
   if (filters?.branch) query = query.eq('branch', filters.branch)
   if (filters?.status) query = query.eq('status', filters.status)
-  if (filters?.time_block) query = query.eq('time_block', filters.time_block)
-  if (filters?.priority) query = query.eq('priority', filters.priority)
-  if (filters?.assigned_date_from) query = query.gte('assigned_date', filters.assigned_date_from)
+if (filters?.assigned_date_from) query = query.gte('assigned_date', filters.assigned_date_from)
   if (filters?.assigned_date_to) query = query.lte('assigned_date', filters.assigned_date_to)
   if (filters?.search) {
     query = query.or(`title.ilike.%${filters.search}%,notes.ilike.%${filters.search}%`)
