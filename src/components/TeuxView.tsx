@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { format, addDays, isToday } from 'date-fns'
 import { Plus } from 'lucide-react'
 import {
-  DndContext, closestCenter, PointerSensor, useSensor, useSensors,
+  DndContext, closestCenter, PointerSensor, TouchSensor, useSensor, useSensors,
   type DragEndEvent,
 } from '@dnd-kit/core'
 import {
@@ -52,7 +52,10 @@ function DayColumn({ date, tasks, displayIds, hoverable, onToggleDone, onEdit, o
   const today = isToday(date)
   const [hovered, setHovered] = useState(false)
 
-  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 8 } }))
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
+    useSensor(TouchSensor, { activationConstraint: { delay: 100, tolerance: 5 } }),
+  )
 
   const handleDragEnd = async (event: DragEndEvent) => {
     const { active, over } = event

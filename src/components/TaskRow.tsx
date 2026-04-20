@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
-import { Square, CheckSquare, ChevronRight } from 'lucide-react'
+import { Square, CheckSquare, ChevronRight, GripVertical } from 'lucide-react'
 import { addDays, format } from 'date-fns'
 
 import { useSortable } from '@dnd-kit/sortable'
@@ -73,14 +73,13 @@ export function TaskRow({ task, displayId, onToggleDone, onEdit, onDelete }: Tas
           position: 'relative',
           overflow: 'hidden',
         }}
-        className="relative flex items-center select-none cursor-grab active:cursor-grabbing"
+        className="relative flex items-center select-none"
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
         {...attributes}
-        {...listeners}
       >
         {/* Swipe-to-next-day background */}
         {swipeDx > 0 && (
@@ -94,67 +93,89 @@ export function TaskRow({ task, displayId, onToggleDone, onEdit, onDelete }: Tas
             <ChevronRight size={14} color="white" />
           </div>
         )}
+
         <div style={{ transform: `translateX(${swipeDx}px)`, transition: swipeDx > 0 ? 'none' : 'transform 0.2s ease', width: '100%', display: 'flex', alignItems: 'center' }}>
-        {/* Checkbox — always visible on mobile, slides in on hover on desktop */}
-        <div style={{
-          width: isMobile || hovered || isDone ? 28 : 0,
-          overflow: 'hidden',
-          flexShrink: 0,
-          transition: 'width 0.15s ease',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-        }}>
-          <button
+
+          {/* Drag handle — grip on mobile (always visible), cursor-grab on desktop */}
+          <div
+            {...listeners}
             onPointerDown={e => e.stopPropagation()}
-            onClick={e => { e.stopPropagation(); onToggleDone(task) }}
-            style={{ color: isDone ? '#8a9499' : '#cbd3d6', display: 'flex', alignItems: 'center' }}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              flexShrink: 0,
+              width: isMobile ? 28 : (hovered ? 20 : 0),
+              overflow: 'hidden',
+              transition: 'width 0.15s ease',
+              cursor: 'grab',
+              color: '#cbd3d6',
+              touchAction: 'none',
+            }}
           >
-            {isDone ? <CheckSquare size={15} /> : <Square size={15} />}
-          </button>
-        </div>
+            <GripVertical size={14} />
+          </div>
 
-        {/* Branch color strip */}
-        <div style={{
-          width: 3, borderRadius: 3,
-          backgroundColor: barColor,
-          flexShrink: 0,
-          alignSelf: 'stretch',
-          margin: '5px 10px 5px 0',
-        }} />
-
-        {/* Content — click to edit */}
-        <div
-          className="flex-1 flex flex-col justify-center py-1.5 pr-2 min-w-0"
-          onPointerDown={e => e.stopPropagation()}
-          onClick={() => setEditing(true)}
-          style={{ cursor: 'pointer' }}
-        >
-          <span style={{
-            fontFamily: "'Lato', sans-serif",
-            fontSize: 14,
-            lineHeight: 1.4,
-            color: isDone ? '#8a9499' : '#232a2e',
-            textDecoration: isDone ? 'line-through' : 'none',
+          {/* Checkbox — always visible on mobile, slides in on hover on desktop */}
+          <div style={{
+            width: isMobile || hovered || isDone ? 28 : 0,
             overflow: 'hidden',
-            textOverflow: 'ellipsis',
-            whiteSpace: 'nowrap',
+            flexShrink: 0,
+            transition: 'width 0.15s ease',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
           }}>
-            {task.title}
-          </span>
-          {task.branch && (
+            <button
+              onPointerDown={e => e.stopPropagation()}
+              onClick={e => { e.stopPropagation(); onToggleDone(task) }}
+              style={{ color: isDone ? '#8a9499' : '#cbd3d6', display: 'flex', alignItems: 'center' }}
+            >
+              {isDone ? <CheckSquare size={15} /> : <Square size={15} />}
+            </button>
+          </div>
+
+          {/* Branch color strip */}
+          <div style={{
+            width: 3, borderRadius: 3,
+            backgroundColor: barColor,
+            flexShrink: 0,
+            alignSelf: 'stretch',
+            margin: '5px 10px 5px 0',
+          }} />
+
+          {/* Content — click to edit */}
+          <div
+            className="flex-1 flex flex-col justify-center py-1.5 pr-2 min-w-0"
+            onPointerDown={e => e.stopPropagation()}
+            onClick={() => setEditing(true)}
+            style={{ cursor: 'pointer' }}
+          >
             <span style={{
-              fontFamily: "'Space Grotesk', sans-serif",
-              fontSize: 11,
-              color: '#8a9499',
+              fontFamily: "'Lato', sans-serif",
+              fontSize: 14,
+              lineHeight: 1.4,
+              color: isDone ? '#8a9499' : '#232a2e',
+              textDecoration: isDone ? 'line-through' : 'none',
               overflow: 'hidden',
               textOverflow: 'ellipsis',
               whiteSpace: 'nowrap',
             }}>
-              {task.branch}
+              {task.title}
             </span>
-          )}
-        </div>
+            {task.branch && (
+              <span style={{
+                fontFamily: "'Space Grotesk', sans-serif",
+                fontSize: 11,
+                color: '#8a9499',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+              }}>
+                {task.branch}
+              </span>
+            )}
+          </div>
         </div>
       </div>
 
