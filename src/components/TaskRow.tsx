@@ -1,5 +1,6 @@
-import { useState, useRef } from 'react'
-import { Square, CheckSquare } from 'lucide-react'
+import { useState, useRef, useEffect } from 'react'
+import { Square, CheckSquare, ChevronRight } from 'lucide-react'
+import { addDays, format } from 'date-fns'
 
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
@@ -21,7 +22,16 @@ export function TaskRow({ task, displayId, onToggleDone, onEdit, onDelete }: Tas
   const [deleting, setDeleting] = useState(false)
   const [hovered, setHovered] = useState(false)
   const [swipeDx, setSwipeDx] = useState(0)
+  const [isMobile, setIsMobile] = useState(false)
   const touchStartX = useRef<number | null>(null)
+
+  useEffect(() => {
+    const mq = window.matchMedia('(max-width: 640px)')
+    setIsMobile(mq.matches)
+    const handler = (e: MediaQueryListEvent) => setIsMobile(e.matches)
+    mq.addEventListener('change', handler)
+    return () => mq.removeEventListener('change', handler)
+  }, [])
 
   const isDone = task.status === 'Done'
   const barColor = useBranchColor(task.branch ?? null)
@@ -35,7 +45,10 @@ export function TaskRow({ task, displayId, onToggleDone, onEdit, onDelete }: Tas
     if (dx > 0) setSwipeDx(Math.min(dx, 80))
   }
   const handleTouchEnd = () => {
-    if (swipeDx > 60) onToggleDone(task)
+    if (swipeDx > 60 && task.assigned_date) {
+      const nextDay = format(addDays(new Date(task.assigned_date + 'T00:00:00'), 1), 'yyyy-MM-dd')
+      onEdit(task.id, { assigned_date: nextDay })
+    }
     setSwipeDx(0)
     touchStartX.current = null
   }
@@ -75,22 +88,22 @@ export function TaskRow({ task, displayId, onToggleDone, onEdit, onDelete }: Tas
         {...attributes}
         {...listeners}
       >
-        {/* Swipe-to-done background */}
+        {/* Swipe-to-next-day background */}
         {swipeDx > 0 && (
           <div style={{
             position: 'absolute', inset: 0,
-            backgroundColor: isDone ? '#f87171' : '#22c55e',
+            backgroundColor: '#3b82f6',
             opacity: swipeDx / 80,
             display: 'flex', alignItems: 'center', paddingLeft: 12,
             pointerEvents: 'none',
           }}>
-            <CheckSquare size={14} color="white" />
+            <ChevronRight size={14} color="white" />
           </div>
         )}
         <div style={{ transform: `translateX(${swipeDx}px)`, transition: swipeDx > 0 ? 'none' : 'transform 0.2s ease', width: '100%', display: 'flex', alignItems: 'center' }}>
-        {/* Checkbox — slides in from left on hover */}
+        {/* Checkbox — always visible on mobile, slides in on hover on desktop */}
         <div style={{
-          width: hovered || isDone ? 28 : 0,
+          width: isMobile || hovered || isDone ? 28 : 0,
           overflow: 'hidden',
           flexShrink: 0,
           transition: 'width 0.15s ease',

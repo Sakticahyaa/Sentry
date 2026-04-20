@@ -72,6 +72,11 @@ export default function App() {
   const { tasks, loading, addTask, editTask, removeTask, cycleStatus, reorder, setTasks } = useTasks(undefined, !!user)
   const { branches, getColor, addBranch, removeBranch, editBranch } = useBranches(!!user)
 
+  const tasksRef = useRef(tasks)
+  const editTaskRef = useRef(editTask)
+  useEffect(() => { tasksRef.current = tasks }, [tasks])
+  useEffect(() => { editTaskRef.current = editTask }, [editTask])
+
   // Auto-roll overdue incomplete tasks to today on first load
   useEffect(() => {
     if (loading || rolledOver.current) return
@@ -80,6 +85,24 @@ export default function App() {
     const overdue = tasks.filter(t => t.assigned_date && t.assigned_date < today && t.status !== 'Done')
     overdue.forEach(t => editTask(t.id, { assigned_date: today }))
   }, [loading])
+
+  // Auto-roll at midnight each day
+  useEffect(() => {
+    const scheduleRollover = (): ReturnType<typeof setTimeout> => {
+      const now = new Date()
+      const midnight = new Date(now)
+      midnight.setHours(24, 0, 0, 0)
+      return setTimeout(() => {
+        const today = format(new Date(), 'yyyy-MM-dd')
+        tasksRef.current
+          .filter(t => t.assigned_date && t.assigned_date < today && t.status !== 'Done')
+          .forEach(t => editTaskRef.current(t.id, { assigned_date: today }))
+        timer = scheduleRollover()
+      }, midnight.getTime() - now.getTime())
+    }
+    let timer = scheduleRollover()
+    return () => clearTimeout(timer)
+  }, [])
 
   if (authLoading) {
     return (
